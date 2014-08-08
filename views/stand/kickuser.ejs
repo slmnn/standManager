@@ -1,0 +1,55 @@
+<%- partial('../partials/header') %>
+
+<div class="container">
+	<form action="/stand/kickuser/<%= stand.id %>" method="post" role="form" class="form-horizontal" >
+		<fieldset>
+
+			<legend><%= i18n('Remove user from my stand') %></legend>
+
+	    <div class="form-group">
+	      <label class="control-label" for="input_stand_name"><%= i18n('Stand') %></label>
+			    <input id="input_stand_name" name="input_stand_name" type="text" readonly value="<%= stand.name %>" class="form-control">
+			    <input id="input_stand_id" name="input_stand_id" type="hidden" readonly value="<%= stand.id %>" class="form-control" >
+	    </div>
+
+	    <div class="form-group">
+	      <label class="control-label" for="input_user_id"><%= i18n('User') %> (<%= i18n('required') %>)</label>
+	        <select id="input_user_id" name="input_user_id" class="form-control">
+	        	<option selected="true" disabled="disabled" value="-1"><%= i18n('Select user') %></option>
+	          <% _.each(users, function (u) { %>
+	            <option value="<%= u.id %>" email="<%= u.email %>"><%= u.firstname %> <%= u.lastname %></option>
+	          <% }) %>
+	        </select>
+	    </div>
+
+			<div class="form-group">
+			  <label class="control-label" for="input_email"><%= i18n('User Email') %> (<%= i18n('required') %>)</label>
+			   <input id="input_email" readonly name="input_email" type="email" placeholder="john.doe@example.com" class="form-control">
+			</div>
+
+			<div class="form-group">
+			  <label class="control-label" for="input_message"><%= i18n('Message') %> (<%= i18n('required') %>)</label>
+			    ​<textarea id="input_message" name="input_message" rows="9" class="form-control">
+Hi,
+
+I removed you from stand _standname. Thank you for your service!
+
+BR,
+_myfullname
+			  	</textarea>
+			</div>
+
+			<div class="form-group">
+			    <button id="input_submit" name="input_submit" class="btn btn-primary pull-right"><%= i18n('Send') %></button>
+			</div>
+
+		</fieldset>
+	</form>
+
+</div>
+
+<script>
+$('#input_user_id').on('change', function() {
+	$('#input_email').val($('#input_user_id option:selected').attr('email'));
+});
+</script>

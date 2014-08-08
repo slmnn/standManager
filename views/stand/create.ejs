@@ -1,0 +1,55 @@
+<%- partial('../partials/header')%>
+
+<div class="container">
+	<form class="form-horizontal" action="create" method="post">
+		<fieldset>
+
+			<legend><%= i18n('Create new stand') %></legend>
+			<div class="form-group">
+			  <label class="control-label" for="input_name"><%= i18n('Name') %> (<%= i18n('required') %>)</label>
+			  <input id="input_name" name="input_name" type="text" placeholder="Railwaystation stand" class="form-control">
+			</div>
+
+			<div class="form-group">
+			  <label class="control-label" for="input_location"><%= i18n('Location') %> (<%= i18n('required') %>)</label>
+			    <input id="input_location" name="input_location" type="text" placeholder="Rautatieasema, Itsenäisyydenkatu 2, Tampere" class="form-control">
+			</div>
+
+			<div class="form-group">
+			  <label class="control-label" for="input_description"><%= i18n('Description') %> (<%= i18n('required') %>)</label>
+			  <input id="input_description" name="input_description" type="text" placeholder="Special program cart #1." class="form-control">
+			</div>
+
+			<div class="form-group">
+				<label class="control-label" for="map_canvas"><%= i18n('Set Coordinates') %></label>
+				<div id="map_canvas"></div>
+			</div>
+			<div class="form-group">
+		    <label for="input_lat"><%= i18n('Latitude') %>:</label>
+		    <% if(typeof lastLat != 'undefined') { %>
+		    	<input class="form-control" name="input_lat" id="input_lat" type="text" value="<%= lastLat %>" />
+		    <% } else { %>
+		    	<input class="form-control" name="input_lat" id="input_lat" type="text" value="" />
+		    <% } %>
+
+		    <label for="input_lng"><%= i18n('Longitude') %>:</label>
+		    <% if(typeof lastLng != 'undefined') { %>
+		    	<input class="form-control" name="input_lng" id="input_lng" type="text" value="<%= lastLng %>" />
+		    <% } else { %>
+		    	<input class="form-control" name="input_lng" id="input_lng" type="text" value="" />
+		    <% } %>
+			</div>
+			<div class="form-group">
+			    <button id="input_submit" name="input_submit" class="btn btn-lg btn-primary btn-block"><%= i18n('Submit') %></button>
+			</div>
+
+		</fieldset>
+	</form>
+
+</div>
+
+<!-- Google Maps API v3 -->
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript" src="/js/map/create_new_map.js"></script>
+
+<%- partial('../partials/footer')%>

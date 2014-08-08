@@ -1,0 +1,48 @@
+<%- partial('../partials/header') %>
+
+<div class="container">
+	<form action="create" method="post" role="form" class="form-horizontal" >
+		<fieldset>
+
+			<legend><%= i18n('Send new stand invitation') %></legend>
+			<div class="form-group">
+			  <label class="control-label" for="input_name"><%= i18n('Inviter name') %> (<%= i18n('required') %>)</label>
+			    <input id="input_name" name="input_name" type="text" readonly value="<%= user.firstname + ' ' + user.lastname %>" class="form-control">
+			</div>
+
+	    <div class="form-group">
+	      <label class="control-label" for="input_stand_id"><%= i18n('Stand') %> (<%= i18n('required') %>)</label>
+	        <select id="input_stand_id" name="input_stand_id" class="form-control">
+	          <% _.each(stands, function (s) { %>
+	            <option value="<%= s.id %>"><%= s.name %></option>
+	          <% }) %>            
+	        </select>
+	    </div>
+
+			<div class="form-group">
+			  <label class="control-label" for="input_email"><%= i18n('Invitee email') %> (<%= i18n('required') %>)</label>
+			    <input id="input_email" name="input_email" type="email" placeholder="john.doe@example.com" class="form-control">
+			</div>
+
+			<div class="form-group">
+			  <label class="control-label" for="input_message"><%= i18n('Message') %> (<%= i18n('required') %>)</label>
+			    ​<textarea id="input_message" name="input_message" rows="9" class="form-control">
+Hi,
+
+I would like to invite you to a stand. Follow the link below to accept this invitation:
+
+ _invitationlink 
+
+BR,
+_myfullname
+			  	</textarea>
+			</div>
+
+			<div class="form-group">
+			    <button id="input_submit" name="input_submit" class="btn btn-primary pull-right"><%= i18n('Send') %></button>
+			</div>
+
+		</fieldset>
+	</form>
+
+</div>

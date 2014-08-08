@@ -1,0 +1,58 @@
+<%- partial('../partials/header')%>
+
+<div class="container">
+	<form class="form-horizontal" action="create" method="post">
+		<fieldset>
+
+			<legend><%= i18n('Create new shift') %></legend>
+			<div class="control-group">
+			  <label class="control-label" for="input_title"><%= i18n('Title') %> (<%= i18n('required') %>)</label>
+			  <div class="controls">
+			    <input id="input_title" name="input_title" type="text" placeholder="Stand shift" class="input-xlarge">
+			  </div>
+			</div>
+
+			<div class="control-group">
+			  <label class="control-label" for="input_all_day"><%= i18n('All day') %></label>
+			  <div class="controls">
+			    <input id="input_all_day" name="input_all_day" value="all_day_true" type="checkbox" class="input-xlarge">
+			  </div>
+			</div>
+
+			<div class="control-group">
+			  <label class="control-label" for="input_start"><%= i18n('Start time') %> (<%= i18n('required') %>)</label>
+			  <div class="controls">
+					<div class="input-group" data-align="top" data-autoclose="true">
+						<input type="datetime-local" class="form-control" value="10:00" name="input_start">
+						<span class="input-group-addon">
+							<i class="fa fa-fw fa-clock-o"></i>
+						</span>
+					</div>
+			  </div>
+			  <label class="control-label" for="input_end"><%= i18n('End time') %> (<%= i18n('required') %>)</label>
+			  <div class="controls">
+					<div class="input-group" data-align="top" data-autoclose="true">
+						<input type="datetime-local" class="form-control" value="12:00" name="input_end">
+						<span class="input-group-addon">
+							<i class="fa fa-fw fa-clock-o"></i>
+						</span>
+					</div>
+			  </div>
+			</div>
+
+
+			<div class="control-group">
+			  <div class="controls">
+			    <button id="input_submit" name="input_submit" class="btn btn-primary"><%= i18n('Submit') %></button>
+			  </div>
+			</div>
+
+		</fieldset>
+	</form>
+
+</div>
+
+<!-- Init Bootstrap timepickers -->
+<script type="text/javascript" src="/js/shift/init_timepickers.js"></script>
+
+<%- partial('../partials/footer')%>

@@ -1,0 +1,27 @@
+<header>
+  <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="navbar-inner">
+      <div class="container">
+          <ul class="nav nav-pills">
+            <li <%= ('viewOptions.activePage' == 'territory') ? "class='active'" : "" %> ><a href="/home"><i class="fa fa-globe"></i> <%= i18n('My Calendar') %></a></li>
+            <li <%= ('viewOptions.activePage' == 'holder') ? "class='active'" : "" %> ><a href="/stand"><i class="fa fa-users"></i> <%= i18n('My Stands') %></a></li>
+            <li class="divider-vertical"></li>
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                  <i class="fa fa-user"></i> <%= locals.current_user %>
+                  <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <% if(locals.current_user == "admin") { %>
+                  <li><a href="/app/update"><i class="fa fa-gears"></i> <%= i18n('App Settings') %></a></li>
+                  <% } %>
+                  <li><a href="/user/update"><i class="fa fa-gears"></i> <%= i18n('My Settings') %></a></li>
+                  <li><a href="https://www.dropbox.com/s/5aas9qeugo0dczx/Aluesovellus_ohjeet.pdf?dl=1" target="blank"><i class="fa fa-question-circle"></i> <%= i18n('User Guide') %> [PDF]</a></li>
+                  <li class="divider"></li>
+                  <li><a href="/logout"><i class="fa fa-sign-out"></i> <%= i18n('Log out') %></a></li>
+                </ul>
+            </li>
+          </ul>
+    </div>
+  </div>
+</header>

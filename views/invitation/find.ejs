@@ -1,0 +1,22 @@
+<%- partial('../partials/header') %>
+
+<div class="container">
+	<form class="form-horizontal" action="../accept/<%= invitation_id %>" method="post">
+		<fieldset>
+			<legend><%= i18n('Do you accept the invitation?') %></legend>
+			
+			<p><%= i18n('You are invited by') %> <%= invitation.created_by_name %> <%= i18n('to the following stand:') %></p>
+			<p><b><%= stand.name %></b><br/>
+			<%= stand.description %></p>
+
+			<div class="control-group">
+			  <div class="controls">
+			    <button id="input_submit" name="input_submit" value="accept" class="btn btn-success"><%= i18n('Accept') %></button>
+			    <button id="input_submit" name="input_submit" value="decline" class="btn btn-warning"><%= i18n('Decline') %></button>
+			  </div>
+			</div>
+
+		</fieldset>
+	</form>
+
+</div>

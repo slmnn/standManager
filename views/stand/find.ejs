@@ -1,0 +1,240 @@
+<%- partial('../partials/header') %>
+
+<div class="container">
+	<div class="page-header">
+    <h2><%= stand.name %><br/><small><%= stand.description %></small></h2>
+  </div>
+  
+	<div id='calendar' class="calendar"></div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="assign_shift_modal" tabindex="-1" role="dialog" aria-labelledby="assign_shift_modal_label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="assign_shift_title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+      	<div id="assign_shift_now_assigned_to"></div>
+				<form action="/shift/update" id="assign_shift_form" method="post" role="form">
+					<fieldset>
+				    <legend><%= i18n('Assign the shift to') %></legend>
+				    <div class="form-group">
+				      <label for="input_assigned_to_id"><%= i18n('Name') %></label>
+				      <select id="input_assigned_to_id" name="input_assigned_to_id" class="form-control"></select>
+				    </div>
+				    <div class="form-group">
+				      <button id="input_submit" name="input_submit" class="btn btn-primary pull-right"><%= i18n('Set') %></button>
+				    </div>
+
+				  </fieldset>
+				</form>
+      </div>
+      <div class="modal-footer">
+			  <button id="delete_shift_button" class="btn btn-danger"><%= i18n('Delete') %></button>
+			  <button id="unassign_shift_button" class="btn btn-warning"><%= i18n('Unassign') %></button>
+			  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<script type="text/javascript">
+var stand_id = "<%= stand.id %>";
+var stand_name = "<%= stand.name %>";
+var last_calendar_event_clicked = {};
+
+$(document).ready(function() {
+
+$( "#delete_shift_button" ).click(function( event ) {
+  // Stop form from submitting normally
+  event.preventDefault();
+
+  $("#assign_shift_modal").modal("hide");	
+
+  // Send the data using delete
+  $.ajax({
+    url: '/shift/destroy/' + last_calendar_event_clicked.id,
+    type: 'DELETE',
+    success: function(result) {
+	    var box = bootbox.alert("Shift deleted!");
+			setTimeout(function() {
+	    	box.modal('hide');
+	    	$('#calendar').fullCalendar( 'refetchEvents' );
+			}, 1500);
+    }, 
+    fail: function(result) {
+    	var box = bootbox.alert("Deleting shift was not successfull!");
+    }
+	});
+
+});
+
+$( "#unassign_shift_button" ).click(function( event ) {
+  // Stop form from submitting normally
+  event.preventDefault();
+  $("#assign_shift_modal").modal("hide");	
+  // Send the data using post
+	var posting = $.post( '/shift/update/' + last_calendar_event_clicked.id, 
+		{ 
+			input_assigned_to_id: '-1'
+		} 
+	).done(function(data) {
+    var content = data.msg;
+    var box = bootbox.alert('' + content);
+		setTimeout(function() {
+    	box.modal('hide');
+    	$('#calendar').fullCalendar( 'refetchEvents' );
+		}, 1500);
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err);
+  });
+});
+
+// Attach a submit handler to the form
+$( "#assign_shift_form" ).submit(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+ 
+  // Get some values from elements on the page:
+  var $form = $( this ),
+    assigned_to_id = $form.find( "select[name='input_assigned_to_id']" ).val(),
+    assigned_to_name = $form.find( "#input_assigned_to_id option:selected" ).text().trim(),
+    url = $form.attr( "action" );
+ 
+  // Send the data using post
+	var posting = $.post( url, 
+		{ 
+			input_assigned_to_id: assigned_to_id,
+			input_assigned_to_name: assigned_to_name
+		} 
+	).done(function(data) {
+    console.log(data);
+    var content = data.msg;
+    var box = bootbox.alert(content);
+    setTimeout(function() {
+    	box.modal('hide');
+    	$('#calendar').fullCalendar( 'refetchEvents' );
+		}, 1500);
+    $('#calendar').fullCalendar( 'refetchEvents' );
+    $("#assign_shift_modal").modal("hide");	
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err);
+  });
+});
+
+$('#input_assigned_to_id').on('change', function() {
+    if (this.value == 'disabled') {
+        $('optgroup option').prop('disabled', true);
+    } else {
+        $('optgroup option').prop('disabled', false);
+    }
+});
+
+});
+
+$(document).ready(function() {
+	$('#calendar').fullCalendar({
+		header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'month,agendaWeek,agendaDay'
+    },
+    height: 800,
+    defaultView: 'agendaWeek',
+    firstDay: 1, // monday
+    minTime: '07:00:00', // Could be determined in the backend
+    maxTime: '20:00:00', // Could be determined in the backend
+		selectable: true,
+		selectHelper: true,
+		axisFormat: 'HH:mm',
+		timeFormat: {
+		    agenda: 'H:mm',
+		    month: 'H:mm'
+		},
+		eventClick: function(calEvent, jsEvent, view) {
+			if(!calEvent.assigned) { 
+				$('#unassign_shift_button').prop('disabled', true);
+			} else {
+				$('#unassign_shift_button').prop('disabled', false);
+				$('#unassign_shift_button').prop('enabled', true);
+			}
+			$.get("/stand/possibleusers/" + stand_id, 
+				{start: calEvent.start.format(), end: calEvent.end.format()}
+			).done(function(data) {
+				calEvent.reserved_users = data.reserved_users;
+				calEvent.available_users = data.available_users;
+				last_calendar_event_clicked = calEvent;	
+
+				var select = $("#input_assigned_to_id");
+				select.find('option').remove().end();
+				select.find('optgroup').remove().end();
+				$.each(data.available_users, function(i, user) {
+				  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname));
+				});
+				if(data.reserved_users.length > 0) {
+					select.append($("<optgroup />").val("disabled").attr("label", "Reserved users"));
+					$.each(data.reserved_users, function(i, user) {
+					  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname));
+					});
+				}
+				$("#assign_shift_form").attr("action","/shift/update/" + calEvent.id);
+				var assigned_to_text = (calEvent.assigned_to_name == null || calEvent.assigned_to_name.length == 0) ? 'nobody' : calEvent.assigned_to_name;
+				$("#assign_shift_now_assigned_to").text("This shift is assigned to " + assigned_to_text);
+				$("#assign_shift_title").text(moment(calEvent.start).format('MMM Do') + " @ " + moment(calEvent.start).format('HH:mm') + "-" + moment(calEvent.end).format('HH:mm') + " " + calEvent.title);	
+				$('#assign_shift_modal').modal('show');
+
+			}).fail(function(err) {
+	    	var box = bootbox.alert("ERROR: " + err);
+	  	});
+    },
+		select: function(start, end, jsEvent, view) {
+			var title = stand_name;
+			var eventData = {
+				title: title,
+				start: start,
+				end: end
+			};
+			$.post( "/shift/create", 
+				{ 
+					input_title: stand_name, 
+					input_stand_id: stand_id,
+					input_all_day: "",
+					input_start: eventData.start.format(),
+					input_end: eventData.end.format()
+				} 
+			).done(function() {
+		    var box = bootbox.alert("New shift created!");
+				setTimeout(function() {
+		    	box.modal('hide');
+		    	$('#calendar').fullCalendar('renderEvent', eventData, false);
+	  			$('#calendar').fullCalendar('unselect');
+	  			$('#calendar').fullCalendar( 'refetchEvents' );
+				}, 1000);				
+		  }).fail(function(err) {
+		    var box = bootbox.alert("ERROR: " + err);
+		  });				
+		},
+	  eventSources: [
+	    {
+	    	url: "../shifts/" + stand_id,
+	    	dataType: 'json',
+	    	error: function(err) {
+	    		var box = bootbox.alert("ERROR: " + err.msg);
+        },
+        eventDataTransform: function(event) {
+        	event.color = event.assigned ? (event.accepted ? 'green' : 'orange') : 'red';
+        	if(event.assigned_to_name)
+        		event.title = event.assigned_to_name.length > 0 ? event.assigned_to_name : event.title;
+        	return event;
+        }
+      }
+	  ]
+	});
+});
+</script>

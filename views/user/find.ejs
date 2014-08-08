@@ -1,0 +1,179 @@
+<%- partial('../partials/header') %>
+
+<div class="container">
+	<div class="page-header">
+    <h2><%= user.firstname %> <%= user.lastname %></h2>
+  </div>
+  
+	<div id='calendar' class="calendar"></div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="assign_shift_modal" tabindex="-1" role="dialog" aria-labelledby="assign_shift_modal_label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="assign_shift_title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+      	<div id="assign_shift_shift_description"></div>
+      	<div id="assign_shift_now_assigned_to"></div>
+      </div>
+      <div class="modal-footer">
+			  <button id="accept_shift_button" class="btn btn-success"><%= i18n('Accept') %></button>
+			  <button id="reject_shift_button" class="btn btn-danger"><%= i18n('Reject') %></button>
+			  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/javascript">
+var user_id = "<%= user.id %>";
+var user_fullname = "<%= user.firstname %> <%= user.lastname %>";
+var last_calendar_event_clicked = {};
+
+$(document).ready(function() {
+	$( "#accept_shift_button" ).click(function( event ) {
+	  // Stop form from submitting normally
+	  event.preventDefault();
+	  $("#assign_shift_modal").modal("hide");	
+	  // Send the data using post
+		var posting = $.post( '/shift/update/' + last_calendar_event_clicked.id, 
+			{ 
+				input_assigned_to_id: user_id,
+				input_assigned_to_name: user_fullname,
+				input_accepted: 'true'
+			} 
+		).done(function(data) {
+	    var content = data.msg;
+	    var box = bootbox.alert('' + content);
+			setTimeout(function() {
+	    	box.modal('hide');
+	    	$('#calendar').fullCalendar( 'refetchEvents' );
+			}, 1500);
+	  }).fail(function(err) {
+	    var box = bootbox.alert("ERROR: " + err);
+	  });
+	});
+
+	$( "#reject_shift_button" ).click(function( event ) {
+	  // Stop form from submitting normally
+	  event.preventDefault();
+	  $("#assign_shift_modal").modal("hide");	
+	  // Send the data using post
+		var posting = $.post( '/shift/update/' + last_calendar_event_clicked.id, 
+			{ 
+				input_assigned_to_id: '-1'
+			} 
+		).done(function(data) {
+	    var content = data.msg;
+	    var box = bootbox.alert('' + content);
+			setTimeout(function() {
+	    	box.modal('hide');
+	    	$('#calendar').fullCalendar( 'refetchEvents' );
+			}, 1500);
+	  }).fail(function(err) {
+	    var box = bootbox.alert("ERROR: " + err);
+	  });
+	});
+
+	$('#calendar').fullCalendar({
+		header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'month,agendaWeek,agendaDay'
+    },
+    height: 800,
+    defaultView: 'agendaWeek',
+    firstDay: 1, // monday
+    minTime: '07:00:00', // Could be determined in the backend
+    maxTime: '20:00:00', // Could be determined in the backend
+		selectable: true,
+		selectHelper: true,
+		axisFormat: 'HH:mm',
+		timeFormat: {
+		    agenda: 'H:mm',
+		    month: 'H:mm'
+		},
+		eventClick: function(calEvent, jsEvent, view) {
+			if(calEvent.type == "shift") {
+				if(calEvent.accepted) { 
+					$('#accept_shift_button').prop('disabled', true);
+				} else {
+					$('#accept_shift_button').prop('disabled', false);
+					$('#accept_shift_button').prop('enabled', true);
+				}
+				var now_accepted_text = calEvent.accepted ? "" : "not";
+				$("#assign_shift_now_assigned_to").text("You have " + now_accepted_text + " accepted the shift.");
+				$("#assign_shift_title").text(calEvent.title);	
+				$("#assign_shift_shift_description").text(moment(calEvent.start).format('MMM Do') + " @ " + moment(calEvent.start).format('HH:mm') + "-" + moment(calEvent.end).format('HH:mm') + " " + calEvent.title);	
+				$('#assign_shift_modal').modal('show');
+				last_calendar_event_clicked = calEvent;	
+			} if(calEvent.type == "reservation") {
+				bootbox.confirm("Are you sure you want to remove this reservation (" + moment(calEvent.start).format('MMM Do') + " @ " + moment(calEvent.start).format('HH:mm') + "-" + moment(calEvent.end).format('HH:mm') + "?)", function(result) {
+				  console.log(result);
+				  if(result) {
+						$('#calendar').fullCalendar( 'removeEvents', calEvent.id );
+						// TODO destroy reservation...				  	
+				  }
+				}); 
+			}
+    },
+		select: function(start, end, jsEvent, view) {
+			var eventData = {
+				title: "Reservation",
+				start: start,
+				end: end
+			};
+			$.post( "/reservation/create", 
+				{ 
+					input_title: eventData.title,
+					input_all_day: "",
+					input_start: eventData.start.format(),
+					input_end: eventData.end.format()
+				} 
+			).done(function() {
+		    var box = bootbox.alert("New reservation created!");
+				setTimeout(function() {
+		    	box.modal('hide');
+		    	$('#calendar').fullCalendar('renderEvent', eventData, false);
+		  		$('#calendar').fullCalendar('unselect');
+		  		$('#calendar').fullCalendar( 'refetchEvents' );
+				}, 1000);
+		  }).fail(function(err) {
+		    var box = bootbox.alert("ERROR: " + err);
+		  });				
+
+		},
+	  eventSources: [
+	    {
+	    	url: "../shifts/" + user_id,
+	    	dataType: 'json',
+	    	error: function(err) {
+	    		var box = bootbox.alert("ERROR: " + err);
+        },
+        eventDataTransform: function(event) {
+        	event.type="shift";
+        	event.color = event.accepted ? 'green' : 'blue';
+        	return event;
+        }
+      },
+      {
+	    	url: "../reservations/" + user_id,
+	    	dataType: 'json',
+	    	error: function(err) {
+	    		var box = bootbox.alert("ERROR: " + err);
+        },
+        eventDataTransform: function(event) {
+        	event.type = "reservation";
+        	event.color = 'grey';
+        	return event;
+        }
+      }
+	  ]
+	});
+});
+</script>
