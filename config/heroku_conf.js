@@ -5,9 +5,5 @@ module.exports = {
   sc_password : process.env.SC_PASSWORD,
 
   INVITATION_EMAIL_USER: process.env.SMTP_USERNAME,
-  INVITATION_EMAIL_PASSWORD: process.env.SMTP_PASSWORD,
-
-  adapters : { // sails v.0.9.0
-    'default': 'mongo'
-  }
+  INVITATION_EMAIL_PASSWORD: process.env.SMTP_PASSWORD
 }
