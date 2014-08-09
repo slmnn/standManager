@@ -51,11 +51,15 @@ module.exports.connections = {
   //
   someMongodbServer: {
     adapter: 'sails-mongo',
-    host: 'localhost',
-    port: 27017,
     // user: 'username',
     // password: 'password',
     // database: 'your_mongo_db_name_here'
+    adapter   : 'sails-mongo',
+    host     : 'ds031347.mongolab.com',
+    port     : 31347,
+    user     : process.env.MONGO_DB_USER,
+    password : process.env.MONGO_DB_PASS,
+    database : process.env.MONGO_DB_NAME
   },
 
   // PostgreSQL is another officially supported relational database.
