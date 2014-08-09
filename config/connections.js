@@ -58,7 +58,8 @@ module.exports.connections = {
     port     : 31347,
     user     : process.env.MONGO_DB_USER,
     password : process.env.MONGO_DB_PASS,
-    database : process.env.MONGO_DB_NAME
+    database : process.env.MONGO_DB_NAME,
+    migrate  : 'safe'
   },
 
   // PostgreSQL is another officially supported relational database.
