@@ -13,7 +13,7 @@ if(process.env.USE_BCRYPT == 'true') {
 }
 
 module.exports = {
-
+  migrate: 'safe',
   attributes: {
     
     username: {

@@ -6,7 +6,7 @@
 */
 
 module.exports = {
-
+  migrate: 'safe',
   attributes: {
   	stand_id: {
       type: 'string',

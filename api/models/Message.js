@@ -3,7 +3,7 @@
 */
 
 module.exports = {
-
+  migrate: 'safe',
   attributes: {
   	from: {
   		type: 'string',
