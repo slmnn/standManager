@@ -5,21 +5,21 @@
 		<fieldset>
 
 			<legend><%= i18n('Create new shift') %></legend>
-			<div class="control-group">
+			<div class="form-group">
 			  <label class="control-label" for="input_title"><%= i18n('Title') %> (<%= i18n('required') %>)</label>
 			  <div class="controls">
-			    <input id="input_title" name="input_title" type="text" placeholder="Stand shift" class="input-xlarge">
+			    <input id="input_title" name="input_title" type="text" placeholder="Stand shift" class="form-control">
 			  </div>
 			</div>
 
-			<div class="control-group">
+			<div class="form-group">
 			  <label class="control-label" for="input_all_day"><%= i18n('All day') %></label>
 			  <div class="controls">
-			    <input id="input_all_day" name="input_all_day" value="all_day_true" type="checkbox" class="input-xlarge">
+			    <input id="input_all_day" name="input_all_day" value="all_day_true" type="checkbox" class="form-control">
 			  </div>
 			</div>
 
-			<div class="control-group">
+			<div class="form-group">
 			  <label class="control-label" for="input_start"><%= i18n('Start time') %> (<%= i18n('required') %>)</label>
 			  <div class="controls">
 					<div class="input-group" data-align="top" data-autoclose="true">
@@ -41,7 +41,7 @@
 			</div>
 
 
-			<div class="control-group">
+			<div class="form-group">
 			  <div class="controls">
 			    <button id="input_submit" name="input_submit" class="btn btn-primary"><%= i18n('Submit') %></button>
 			  </div>

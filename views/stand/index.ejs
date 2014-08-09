@@ -37,9 +37,11 @@
   <% }) %>
 
   <hr>
-
-	<a href="/stand/create"><%= i18n('Create new stand') %></a>
-  <a href="/invitation/create"><%= i18n('Invite others to my stand') %></a>
-	<a href="/stand/kickuser/1"><%= i18n('Kick someone off from my stand') %></a>
-
+  <div class="container">
+    <ul class="breadcrumb list-inline">
+    	<li><a href="/stand/create"><i class="fa fa-plus"></i> <%= i18n('Create new stand') %></a></li>
+      <li><a href="/invitation/create"><i class="fa fa-user"></i> <%= i18n('Invite others to my stand') %></a></li>
+    	<li><a href="/stand/kickuser/1"><i class="fa fa-minus"></i> <%= i18n('Kick someone off from my stand') %></a></li>
+    </ul>
+  </div>
 </div>
