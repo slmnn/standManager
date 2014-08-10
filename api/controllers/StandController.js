@@ -71,6 +71,8 @@ module.exports = {
 		if(req.method == 'GET') {
 			var reserved_users = []; 
 			var reserved_user_ids = [];
+			var assigned_user_ids = [];
+			var assigned_users = [];
 			var available_users = [];
 			var prefering_users = [];
 			var all_users = [];
@@ -121,9 +123,34 @@ module.exports = {
 					})
 				})
 			};
+			var findAssignedUsers = function(cb) {
+				// (StartDate1 <= EndDate2) and (StartDate2 <= EndDate1) -> Times overlap
+				async.forEach(all_users, function(user, cb) {
+					Shift.find({assigned_to_id:user.id})
+					.where({accepted: true})
+					.where({ start: { '<=': end }})
+					.where({ end: { '>=': start }})
+					.exec(function(err, s){
+						for(var i=0; i < s.length; i++) {
+							assigned_user_ids.push(s[i].assigned_to_id);
+						}
+						all_users_ids = all_users_ids.reduce(function(a,b){if(a.indexOf(b)<0)a.push(b);return a;},[]);
+						cb();
+					})
+				}, function(err) {
+					console.log("assigned: " + JSON.stringify(assigned_user_ids));
+					User.find({id:assigned_user_ids}).exec(function(err, u){
+						assigned_users = u;
+						cb();
+					})
+				})
+			};
 			var findAvailableUsers = function(cb) {
 				var available_users_ids = all_users_ids.filter(function(n) {
 					return reserved_user_ids.indexOf(n) == -1;
+				});
+				available_users_ids = available_users_ids.filter(function(n) {
+					return assigned_user_ids.indexOf(n) == -1;
 				});
 				console.log("available: " + JSON.stringify(available_users_ids));
 				User.find({id: available_users_ids}).exec(function(err, u) {
@@ -138,10 +165,11 @@ module.exports = {
 					all_users: all_users,
 					available_users: available_users,
 					reserved_users: reserved_users,
+					assigned_users: assigned_users,
 					prefering_users: prefering_users
 				});				
 			}
-			async.series([findStand, findUsers, findReservedUsers, findAvailableUsers], renderView);
+			async.series([findStand, findUsers, findReservedUsers, findAssignedUsers, findAvailableUsers], renderView);
 		} else {
 			return res.send("Only GET allowed!", 404);
 		}

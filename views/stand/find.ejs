@@ -174,12 +174,26 @@ $(document).ready(function() {
 				var select = $("#input_assigned_to_id");
 				select.find('option').remove().end();
 				select.find('optgroup').remove().end();
+				$('#no_available_users').remove();
+				if(data.available_users.length == 0) {
+					$("<span id='no_available_users'>There are no users available!</span>").insertAfter( "#assign_shift_now_assigned_to" );
+				} else if(data.available_users.length == 1) {
+					$("<span id='no_available_users'>There is "+ data.available_users.length +" user available!</span>").insertAfter( "#assign_shift_now_assigned_to" );
+				} else {
+					$("<span id='no_available_users'>There are "+ data.available_users.length +" users available!</span>").insertAfter( "#assign_shift_now_assigned_to" );
+				}
 				$.each(data.available_users, function(i, user) {
 				  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname));
 				});
 				if(data.reserved_users.length > 0) {
 					select.append($("<optgroup />").val("disabled").attr("label", "Reserved users"));
 					$.each(data.reserved_users, function(i, user) {
+					  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname));
+					});
+				}
+				if(data.assigned_users.length > 0) {
+					select.append($("<optgroup />").val("disabled").attr("label", "Assigned users"));
+					$.each(data.assigned_users, function(i, user) {
 					  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname));
 					});
 				}
