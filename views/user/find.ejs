@@ -99,6 +99,7 @@ $(document).ready(function() {
 		    month: 'H:mm'
 		},
 		eventClick: function(calEvent, jsEvent, view) {
+			last_calendar_event_clicked = calEvent;	
 			if(calEvent.type == "shift") {
 				if(calEvent.accepted) { 
 					$('#accept_shift_button').prop('disabled', true);
@@ -111,13 +112,16 @@ $(document).ready(function() {
 				$("#assign_shift_title").text(calEvent.title);	
 				$("#assign_shift_shift_description").text(moment(calEvent.start).format('MMM Do') + " @ " + moment(calEvent.start).format('HH:mm') + "-" + moment(calEvent.end).format('HH:mm') + " " + calEvent.title);	
 				$('#assign_shift_modal').modal('show');
-				last_calendar_event_clicked = calEvent;	
 			} if(calEvent.type == "reservation") {
-				bootbox.confirm("Are you sure you want to remove this reservation (" + moment(calEvent.start).format('MMM Do') + " @ " + moment(calEvent.start).format('HH:mm') + "-" + moment(calEvent.end).format('HH:mm') + "?)", function(result) {
-				  console.log(result);
+				bootbox.confirm("Are you sure you want to remove this reservation (" + moment(calEvent.start).format('MMM Do') + " @ " +moment(calEvent.start).format('HH:mm') + "-" + moment(calEvent.end).format('HH:mm') + "?)", function(result) {
 				  if(result) {
 						$('#calendar').fullCalendar( 'removeEvents', calEvent.id );
-						// TODO destroy reservation...				  	
+						var posting = $.post( '/reservation/destroy/' + calEvent.id).done(function(data) {
+					    console.log(data.msg);
+					    $('#calendar').fullCalendar( 'refetchEvents' );
+					  }).fail(function(err) {
+					    var box = bootbox.alert("ERROR: " + err);
+					  });			  	
 				  }
 				}); 
 			}

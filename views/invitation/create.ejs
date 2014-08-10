@@ -1,7 +1,7 @@
 <%- partial('../partials/header') %>
 
 <div class="container">
-	<form action="create" method="post" role="form" class="form-horizontal" >
+	<form id="invite_user_form" action="create" method="post" role="form" class="form-horizontal" >
 		<fieldset>
 
 			<legend><%= i18n('Send new stand invitation') %></legend>
@@ -26,12 +26,14 @@
 
 			<div class="form-group">
 			  <label class="control-label" for="input_message"><%= i18n('Message') %> (<%= i18n('required') %>)</label>
-			    ​<textarea id="input_message" name="input_message" rows="9" class="form-control">
+			    ​<textarea id="input_message" name="input_message" rows="10" class="form-control">
 Hi,
 
 I would like to invite you to a stand. Follow the link below to accept this invitation:
 
- _invitationlink 
+  _invitationlink 
+
+To accept the invitation you need to log in at _loginlink. If you do not have credentials you can sign up at _signuplink. 
 
 BR,
 _myfullname
@@ -46,3 +48,40 @@ _myfullname
 	</form>
 
 </div>
+
+<script>
+// Attach a submit handler to the form
+$( "#invite_user_form" ).submit(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+ 
+  // Get some values from elements on the page:
+  var $form = $( this ),
+    input_name = $form.find( "#input_name" ).val(),
+    input_stand_id = $form.find( "#input_stand_id" ).val(),
+    input_email = $form.find( "#input_email" ).val(),
+    input_message = $form.find( "#input_message" ).val().replace(new RegExp('\n','g'), '<br />');
+    url = $form.attr( "action" );
+ 
+  // Send the data using post
+	var posting = $.post( url, 
+		{ 
+			input_name: input_name,
+			input_stand_id: input_stand_id,
+			input_email: input_email,
+			input_message: input_message
+		} 
+	).done(function(data) {
+    console.log(data);
+    var content = data.msg;
+    var box = bootbox.alert(content);
+    setTimeout(function() {
+    	box.modal('hide');
+    	$( "#invite_user_form" ).find( "#input_email" ).val('');
+		}, 1500);
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err);
+  });
+});
+</script>

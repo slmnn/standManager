@@ -26,7 +26,7 @@ module.exports = {
 				User.findOne(req.user[0].id).exec(function(err, u) {
 					u.stands.push(s.id + "");
 					User.update({id:u.id},{stands:u.stands}, function(err, new_u) {
-						return res.json(new_u,200);
+						return res.redirect('/stand');
 					})
 				})
 			});	
@@ -132,7 +132,7 @@ module.exports = {
 				})
 			};
 			var renderView = function(err) {
-				if(err) res.send(err, 500);
+				if(err) return res.send(err, 500);
 				return res.json({
 					stand: stand,
 					all_users: all_users,
@@ -143,7 +143,7 @@ module.exports = {
 			}
 			async.series([findStand, findUsers, findReservedUsers, findAvailableUsers], renderView);
 		} else {
-			res.send("Only GET allowed!", 404);
+			return res.send("Only GET allowed!", 404);
 		}
 	},
 	findShifts: function(req, res) {
@@ -167,7 +167,7 @@ module.exports = {
 					allDay: s[i].allDay
 				});
 			}
-			res.json(out, 200);
+			return res.json(out, 200);
 		});
 	},
 	createShift: function(req, res) {
@@ -230,7 +230,7 @@ module.exports = {
 					if(index > -1) {
 						u.stands.splice(index,1);
 						User.update({id:u.id},{stands:u.stands}, function(err, new_u) {
-							return res.json(new_u,200);
+							return res.json({msg:'User '+ new_u[0].firstname + ' ' + new_u[0].lastname +' removed from the stand!', stand:s, user:new_u});
 						})
 					} else {
 						return res.send("This user is not member of this stand!!", 404);

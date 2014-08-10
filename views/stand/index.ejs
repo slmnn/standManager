@@ -13,9 +13,11 @@
         <h4 class="panel-title"><%= i.name %></h4>
       </div>
       <div class="panel-body">
-      	<%= i.description %>
+        <p><%= i.description %></p>
+        <img src="http://maps.googleapis.com/maps/api/staticmap?center=<%= i.lat %>,<%= i.lng %>&zoom=13&size=240x160&maptype=roadmap
+&markers=<%= i.lat %>,<%= i.lng %>" /><br />
+        <small><i class="fa fa-map-marker"></i> <i><%= i.location %> (<a target="_blank" href="http://maps.google.com/maps?q=<%= i.lat %>,<%= i.lng %>&ll=<%= i.lat %>,<%= i.lng %>&z=14"><%= i18n('Show map') %></a>)</i></small>
       </div>
-      <div class="panel-footer"><%= i.location %></div>
     </div>
   <% }) %>
 
@@ -29,10 +31,16 @@
         <h4 class="panel-title"><a href="/stand/find/<%= i.id %>"><%= i.name %></a></h4>
       </div>
       <div class="panel-body">
-        <%= i.description %>
-        <a href="/stand/find/<%= i.id %>" class="btn btn-default btn-xs pull-right"><%= i18n('Manage') %></a>
+        <p><%= i.description %></p>
+        <small><i class="fa fa-map-marker"></i> <i><%= i.location %> (<a target="_blank" href="http://maps.google.com/maps?q=<%= i.lat %>,<%= i.lng %>&ll=<%= i.lat %>,<%= i.lng %>&z=14"><%= i18n('Show map') %></a>)</i></small>
       </div>
-      <div class="panel-footer"><%= i.location %></div>
+      <div class="panel-footer clearfix">
+        <div>
+          <a href="/stand/find/<%= i.id %>" class="btn btn-primary btn-xs"><%= i18n('Assign shifts') %></a>
+          <a href="/invitation/create/<%= i.id %>" class="btn btn-default btn-xs"><%= i18n('Invite others') %></a>
+          <a href="/stand/kickuser/<%= i.id %>" class="btn btn-default btn-xs"><%= i18n('Remove participants') %></a>
+        </div>
+      </div>
     </div>
   <% }) %>
 
@@ -40,8 +48,6 @@
   <div class="container">
     <ul class="breadcrumb list-inline">
     	<li><a href="/stand/create"><i class="fa fa-plus"></i> <%= i18n('Create new stand') %></a></li>
-      <li><a href="/invitation/create"><i class="fa fa-user"></i> <%= i18n('Invite others to my stand') %></a></li>
-    	<li><a href="/stand/kickuser/1"><i class="fa fa-minus"></i> <%= i18n('Kick someone off from my stand') %></a></li>
     </ul>
   </div>
 </div>

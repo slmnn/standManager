@@ -18,10 +18,10 @@ module.exports = {
 			).exec(function(err, s){
 				console.log(err, s);
 				if(err) res.send(500, {error: err});
-				res.send(200, {msg:'New reservation created!'});		
+				return res.json({msg:'Reservation created!'});
 			});	
 		} else {
-			res.send(403, "Only POST is allowed");
+			return res.send(403, "Only POST is allowed");
 		}
 	},
 	destroy: function(req, res) {
@@ -29,11 +29,11 @@ module.exports = {
 			if(err || typeof r == 'undefined') res.send("ERROR: " + err, 500);
 			if(r.user_id == req.user[0].id) {
 				r.destroy(function(err) {
-					if(err) res.send("ERROR: " + err, 500);
-					res.send("Reservation destroyed.", 200);
+					if(err) return res.send("ERROR: " + err, 500);
+					return res.json({msg:'Reservation destroyed!'});
 				})
 			} else {
-				res.send("ERROR: " + err, 403);
+				return res.send("ERROR: " + err, 403);
 			}
 		})
 	}

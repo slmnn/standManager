@@ -17,11 +17,11 @@ module.exports = {
 			.where({declined:false})
 			.exec(function(err, i){
 				if(err) return res.send("ERROR " + err, 500);
-				if(i==null) return res.send("Invitation is no longer available!", 200);
+				if(i==null) return res.json({msg:"ERROR: Invitation is no longer available!"}, 200);
 				if(req.body.input_submit == "decline") {
 					i.declined = true;
 					i.save(function(err, new_i) {
-						return res.send("Invitation was declined!", 200);
+						return res.json({msg:"You have declined the invitation!"}, 200);
 					})
 				} else {
 					var now = new Date();
@@ -33,16 +33,16 @@ module.exports = {
 							User.findOne(req.user[0].id).exec(function(err, u) {
 								if(!u || err) return res.send("ERROR " + err, 500);
 								if(u.stands.indexOf(i.stand_id) != -1) {
-									return res.send("ERROR: You are already member of this stand!", 500);
+									return res.json({msg:"ERROR: You are already member of this stand!"});
 								}
 								u.stands.push(i.stand_id + "");
 								User.update({id:u.id},{stands:u.stands}, function(err, new_u) {
-									return res.json(new_u,200);
+									return res.json({msg:"You have accepted the invitation!"});
 								})
 							})
 						})
 					} else {
-						return res.send("Invitation is expired!", 200);
+						return res.json({msg:"ERROR: Invitation is expired!"}, 200);
 					}
 				}
 			})
@@ -75,8 +75,9 @@ module.exports = {
 				})				
 			}
 			var findStands = function(cb) {
-				Stand.find({owner_id:req.user[0].id}).exec(function(err, s){
-					owned_stands = s;
+				Stand.findOne(req.params.id).where({owner_id:req.user[0].id}).exec(function(err, s){
+					if(err || s == null) { console.log("no stand"); cb(err); }
+					owned_stands = [s];
 					cb();
 				})
 			}
@@ -114,23 +115,26 @@ module.exports = {
 				// setup e-mail data with unicode symbols
 				console.log(JSON.stringify(i));
 				var link = 'http://' + req.headers.host + '/invitation/find/' + i.id;
-				var html_message_with_link = i.message.replace("_invitationlink", '<a href="'+link+'">http://' + link + '</a>');
+				var signup_link = 'http://' + req.headers.host + '/user/create';
+				var login_link = 'http://' + req.headers.host + '/login';
+				var html_message_with_link = i.message.replace("_invitationlink", '<a href="'+link+'">' + link + '</a>');
 				html_message_with_link = html_message_with_link.replace("_myfullname", req.body.input_name);
+				html_message_with_link = html_message_with_link.replace("_loginlink", '<a href="'+login_link+'">' + login_link + '</a>');
+				html_message_with_link = html_message_with_link.replace("_signuplink", '<a href="'+signup_link+'">' + signup_link + '</a>');
 				var mailOptions = {
 			    from: i.created_by_name, // sender address
 			    to: i.email, // list of receivers
 			    subject: 'Invitation to a stand', // Subject line
-			    text: html_message_with_link, // plaintext body
+			    text: 'Sorry, this message is in HTML.', // plaintext body
 			    html: html_message_with_link  // html body
 				};
 				// send mail with defined transport object
 				transporter.sendMail(mailOptions, function(error, info){
 					transporter.close();
 			    if(error){
-			      console.log(error);
+			      return res.json({msg:'Sending invitation failed! ERROR: ' + error});	
 			    }else{
-			      console.log('Message sent: ' + info.response);
-			      return res.send(200, {msg:'Invitation created!'});		
+			      return res.json({msg:'Invitation sent to ' + mailOptions.to + '!'});		
 			    }
 				});
 			});	

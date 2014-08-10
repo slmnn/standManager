@@ -124,7 +124,6 @@ module.exports = {
 					}
 				).exec(function(err, u){
 					if(err || u == null) res.send(500, err);
-					console.log(JSON.stringify(u));
 					return res.redirect("/login");		
 				});				
 			});

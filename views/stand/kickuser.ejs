@@ -1,7 +1,7 @@
 <%- partial('../partials/header') %>
 
 <div class="container">
-	<form action="/stand/kickuser/<%= stand.id %>" method="post" role="form" class="form-horizontal" >
+	<form action="/stand/kickuser/<%= stand.id %>" method="post" role="form" class="form-horizontal" id="kickuser_form" >
 		<fieldset>
 
 			<legend><%= i18n('Remove user from my stand') %></legend>
@@ -51,5 +51,48 @@ _myfullname
 <script>
 $('#input_user_id').on('change', function() {
 	$('#input_email').val($('#input_user_id option:selected').attr('email'));
+});
+</script>
+
+<script>
+// Attach a submit handler to the form
+$( "#kickuser_form" ).submit(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+ 
+  // Get some values from elements on the page:
+  var $form = $( this ),
+    input_stand_name = $form.find( "#input_stand_name" ).val(),
+    input_stand_id = $form.find( "#input_stand_id" ).val(),
+    input_user_id = $form.find( "#input_user_id" ).val(),
+    input_email = $form.find( "#input_email" ).val(),
+    input_message = $form.find( "#input_message" ).val().replace(new RegExp('\n','g'), '<br />');
+    url = $form.attr( "action" );
+ 
+  // Send the data using post
+	var posting = $.post( url, 
+		{ 
+			input_stand_name: input_stand_name,
+			input_stand_id: input_stand_id,
+			input_user_id: input_user_id,
+			input_email: input_email,
+			input_message: input_message
+		} 
+	).done(function(data) {
+    console.log(data);
+    var content = data.msg;
+    var box = bootbox.confirm(content + " Do you want to remove another participant?", function(result) {
+    	if(result) {
+    		// reload the page
+    		location.reload(true);
+    	} else {
+    		// redirect to /stand
+    		window.location.replace("/stand");
+    	}
+    });
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err.msg);
+  });
 });
 </script>

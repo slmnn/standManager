@@ -29,7 +29,7 @@ module.exports = {
 			).exec(function(err, s){
 				console.log(err, s);
 				if(err) res.send(500, {error: err});
-				res.send(200, {msg:'Shift ' + s.title + ' created!'});		
+				return res.json({msg:'Shift created!'});	
 			});	
 		}
 	},
@@ -39,10 +39,10 @@ module.exports = {
 			if(s.created_by == req.user[0].id) {
 				s.destroy(function(err) {
 					if(err) res.send("ERROR: " + err, 500);
-					res.send(s.title + " destroyed.", 200);
+					return res.json({msg:'Shift destroyed!'});
 				})
 			} else {
-				res.send("ERROR, You are not allowed to destroy this shift.", 403);
+				return res.send("ERROR, You are not allowed to destroy this shift.", 403);
 			}
 		})
 	},
@@ -74,7 +74,7 @@ module.exports = {
 			).exec(function(err, s){
 				console.log(err, s);
 				if(err) res.send(500, {error: err});
-				res.send(200, {msg:message});		
+				return res.json({msg:message});	
 			});	
 		}
 	}

@@ -1,22 +1,65 @@
 <%- partial('../partials/header') %>
 
 <div class="container">
-	<form class="form-horizontal" action="../accept/<%= invitation_id %>" method="post">
+	<form class="form-horizontal" action="../accept/<%= invitation_id %>" method="post" role="form" id="accept_invitation_form">
 		<fieldset>
 			<legend><%= i18n('Do you accept the invitation?') %></legend>
-			
-			<p><%= i18n('You are invited by') %> <%= invitation.created_by_name %> <%= i18n('to the following stand:') %></p>
-			<p><b><%= stand.name %></b><br/>
-			<%= stand.description %></p>
-
 			<div class="form-group">
-			  <div class="controls">
-			    <button id="input_submit" name="input_submit" value="accept" class="btn btn-success"><%= i18n('Accept') %></button>
-			    <button id="input_submit" name="input_submit" value="decline" class="btn btn-warning"><%= i18n('Decline') %></button>
-			  </div>
+				<p><%= i18n('You are invited by') %> <%= invitation.created_by_name %> <%= i18n('to the following stand:') %></p>
+				<p><b><%= stand.name %></b><br/>
+				<%= stand.description %></p>
+				<p><%= i18n('This invitation expires in ') %> <% var expire_date = new Date(invitation.expires) %><%= expire_date.toLocaleDateString() %></p>
+		    <button id="input_submit_accept" name="input_submit" value="accept" class="btn btn-success"><%= i18n('Accept') %></button>
+		    <button id="input_submit_decline" name="input_submit" value="decline" class="btn btn-warning"><%= i18n('Decline') %></button>
 			</div>
 
 		</fieldset>
 	</form>
 
 </div>
+
+<script>
+// Attach a submit handler to the form
+$( "#input_submit_accept" ).click(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+
+  // Send the data using post
+  url = $('#accept_invitation_form').attr( "action" );
+	var posting = $.post( url, 
+		{ 
+			input_submit: 'accept'
+		} 
+	).done(function(data) {
+    console.log(data);
+    var content = data.msg;
+    var box = bootbox.alert('' + content, function() {
+  		window.location.replace("/stand");
+  	});
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err.msg);
+  });
+});
+$( "#input_submit_decline" ).click(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+
+  // Send the data using post
+  url = $('#accept_invitation_form').attr( "action" );
+	var posting = $.post( url, 
+		{ 
+			input_submit: 'decline'
+		} 
+	).done(function(data) {
+    console.log(data);
+    var content = data.msg;
+    var box = bootbox.alert('' + content, function() {
+  		window.location.replace("/stand");
+  	});
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err.msg);
+  });
+});
+</script>
