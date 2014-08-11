@@ -57,6 +57,7 @@ module.exports = {
       passport.use(new GoogleStrategy({
           clientID: sails.config.google_consumer_key,
           clientSecret: sails.config.google_consumer_secret,
+          callbackURL: sails.config.google_redirect_uri,
           scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar']
         },
         function(accessToken, refreshToken, profile, done) {

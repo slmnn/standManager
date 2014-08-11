@@ -10,5 +10,6 @@ module.exports = {
   INVITATION_EMAIL_PASSWORD: process.env.SMTP_PASSWORD,
 
   google_consumer_key: process.env.GOOGLE_KEY,
-  google_consumer_secret: process.env.GOOGLE_SECRET
+  google_consumer_secret: process.env.GOOGLE_SECRET,
+  google_redirect_uri: process.env.GOOGLE_REDIRECT,
 }
