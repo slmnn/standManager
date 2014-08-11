@@ -49,7 +49,7 @@ module.exports = {
 			return res.send("Forbidden!", 403);
 		}
 		if(req.method == 'GET') {
-			var google_is_authorized = req.user[0].google_calendar_accessToken.length != 0 ? true : false;
+			var google_is_authorized = (typeof req.user[0].google_calendar_accessToken != 'undefined') ? (req.user[0].google_calendar_accessToken.length != 0 ? true : false) : false;
 			User.findOne(req.params.id).exec(function(err, u) {
 				if(err) return res.send("Error: " + err, 500);
 				Stand.find({id:u.stands}).exec(function(err, s) {
