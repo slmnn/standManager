@@ -183,7 +183,7 @@ module.exports = {
 					return cb();
 				});
 			}, function(err) {
-				if(err) return res.json({msg:"ERROR " + err},500);
+				if(err) return res.json([],200);
 				return res.json(all_events);
 			});
 		} else {
