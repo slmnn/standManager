@@ -35,6 +35,8 @@ module.exports.routes = {
   'post /login': 'AuthController.process',
   'get /logout': 'AuthController.logout',
 
+  'get /auth/gcalendar': 'AuthController.gcalendar',
+
   'post /invitation/accept/:id': 'InvitationController.accept', 
 
   'get /home': 'UserController.home',

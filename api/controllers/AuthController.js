@@ -20,6 +20,31 @@ var passport = require("passport");
 
 module.exports = {
 
+  // https://developers.google.com/
+  // https://developers.google.com/accounts/docs/OAuth2Login#scope-param
+  gcalendar: function (req, res) {
+    passport.authenticate('google', { failureRedirect: '/login', session: false, scope:['openid', 'email', 'https://www.googleapis.com/auth/calendar'] },
+      function (err, profile) {
+        var google_calendar_accessToken = profile.accessToken;
+        var google_id = profile._json.email;
+        console.log("AUTH_CONTROLLER: ", profile, google_calendar_accessToken, req.query, req.params, req.user[0]);
+        User.findOne(req.user[0].id).exec(function(err, user) {
+          if(err || user == null) res.send("Authentication failed!!");
+          var now = new Date();
+          User.update(
+            {id: user.id}, 
+            {
+              google_calendar_accessToken:google_calendar_accessToken,
+              google_id:google_id
+            }, 
+            function(err, new_user) {
+              if(err || new_user == null) res.send("Authentication failed!");
+              res.redirect('/user/find/' + req.user[0].id);
+          })
+        })
+      })(req, res);
+    },
+
   login: function(req,res){
     if(req.isAuthenticated()) {
       res.redirect('/user/find/' + req.user[0].id)

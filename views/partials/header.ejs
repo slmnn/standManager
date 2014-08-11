@@ -15,7 +15,8 @@
                   <% if(current_user != null && current_user[0].username == "admin") { %>
                   <li><a href="/app/update"><i class="fa fa-gears"></i> <%= i18n('App Settings') %></a></li>
                   <% } %>
-                  <li><a href="/user/update"><i class="fa fa-gears"></i> <%= i18n('My Settings') %></a></li>
+                  <li><a href="/auth/gcalendar"><i class="fa fa-gears"></i> <%= i18n('Connect Google Calendar') %></a></li>
+                  <li><a href="/user/calendarsetup"><i class="fa fa-gears"></i> <%= i18n('Setup Google Calendar') %></a></li>
                   <li><a href="https://www.dropbox.com/s/5aas9qeugo0dczx/Aluesovellus_ohjeet.pdf?dl=1" target="blank"><i class="fa fa-question-circle"></i> <%= i18n('User Guide') %> [PDF]</a></li>
                   <li class="divider"></li>
                   <li><a href="/logout"><i class="fa fa-sign-out"></i> <%= i18n('Log out') %></a></li>

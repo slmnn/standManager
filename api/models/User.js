@@ -35,6 +35,18 @@ module.exports = {
       type: 'string'
     },
 
+    google_calendar_accessToken: {
+      type: 'string'
+    },
+
+    google_id: {
+      type: 'string'
+    },
+
+    google_calendars_imported: {
+      type: 'array'
+    },
+
     email: {
       type: 'email',
       required: true
@@ -61,6 +73,7 @@ module.exports = {
       var obj = this.toObject();
       // Remove the password object value
       delete obj.password;
+      delete obj.google_calendar_accessToken;
       // return the new object without password
       return obj;
     }

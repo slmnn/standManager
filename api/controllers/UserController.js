@@ -15,13 +15,13 @@
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
 
-var ical = require('ical');
+var gcal = require('google-calendar');
 
 module.exports = {
 	home : function (req, res) {
 		var my_stands = []; // TODO
 		var my_shifts = []; // TODO
-		if(req.user[0].id == null) {
+		if(req.user[0]==null || req.user[0].id == null) {
 			return res.send("Forbidden!", 403);
 		}
 		return res.redirect("/user/find/" + req.user[0].id)
@@ -49,11 +49,12 @@ module.exports = {
 			return res.send("Forbidden!", 403);
 		}
 		if(req.method == 'GET') {
+			var google_is_authorized = req.user[0].google_calendar_accessToken.length != 0 ? true : false;
 			User.findOne(req.params.id).exec(function(err, u) {
 				if(err) return res.send("Error: " + err, 500);
 				Stand.find({id:u.stands}).exec(function(err, s) {
 					if(err) return res.send("Error: " + err, 500);
-					return res.view({user:u, stands:s});
+					return res.view({user:u, stands:s, gcal_available: google_is_authorized});
 				})
 			});
 		} else {
@@ -86,7 +87,11 @@ module.exports = {
 	},
 	reservations: function(req, res) {
 		if(req.method == 'GET') {
+			var start = new Date(moment(req.query.start));
+			var end = new Date(moment(req.query.end));
 			Reservation.find({user_id:req.user[0].id})
+			.where({ start: { '>=': start }})
+			.where({ end: { '<=': end }})
 			.exec(function(err, r) {
 				var out = [];
 				for (var i = 0; i < r.length; i++) {
@@ -101,7 +106,88 @@ module.exports = {
 				res.json(out, 200);
 			});
 		} else {
-			res.send(403, "Only POST");
+			res.send(404, "Only GET");
+		}
+	},
+	calendarsetup:  function(req, res) {
+		if(req.method == 'GET') {
+			if(req.user[0].google_calendar_accessToken == null || req.user[0].google_calendar_accessToken.length == 0) {
+				return res.view({error:"Google calendar is not authorized!", items:[]});
+			}
+			console.log(req.user[0].google_calendar_accessToken);
+			var google_calendar = new gcal.GoogleCalendar(req.user[0].google_calendar_accessToken);
+		  google_calendar.calendarList.list(function(err, data) {
+		    if(err) return res.view({error:err, items : []});
+		    return res.view({items:data.items, error:''});
+		  });
+		}
+	},
+	google_calendar_list: function(req, res) {
+		if(req.method == 'POST') {
+			console.log(req.body);
+			console.log(req.params.all());
+			User.findOne({id:req.user[0].id}).exec(function(err, user){
+				if(err || user == null) res.json({msg:"ERROR " + err});
+				User.update(
+					{id:req.user[0].id},
+					{google_calendar_imported:req.body.input_calendars.split(',')},
+					function(err, new_user) {
+						if(err) res.json({msg:"ERROR " + err});
+						return res.redirect('/user/find/' + req.user[0].id);
+					}
+				)
+			})
+		} else {
+			return res.send(404, "Only POST");
+		}
+	},
+	google_calendar_imported: function(req, res) {
+		if(req.method == 'GET') {
+			var start = new Date(moment(req.query.start));
+			var end = new Date(moment(req.query.end));
+			if(req.user[0].google_calendar_imported == null || req.user[0].google_calendar_imported.length == 0) {
+				return res.json([]);
+			}
+			var google_calendar = new gcal.GoogleCalendar(req.user[0].google_calendar_accessToken);
+			var all_events = [];
+			var calendars = req.user[0].google_calendar_imported;
+			async.forEach(calendars, function(calendar, cb) {
+				console.log("Fetching: ", calendar);
+				google_calendar.events.list(calendar, {'timeMin': start.toISOString(), 'timeMax': end.toISOString()}, function(err, eventList){
+					if(err) {
+						console.log("ERROR: ", JSON.stringify(err));
+						return cb(err)
+					};
+					console.log("GOOGLE EVENTS: " + eventList.items.length);
+					for(var i = 0; i < eventList.items.length; i++) {
+						if(eventList.items[i].start.date != null) {
+							all_events.push({
+								title     : eventList.items[i].summary,
+								id        : i,
+								start     : eventList.items[i].start.date + 'T00:00:00',
+								end       : eventList.items[i].end.date + 'T00:00:00',
+								allDay    : false,
+								google_id : eventList.items[i].google_id
+							});
+						} else {
+							all_events.push({
+								title     : eventList.items[i].summary,
+								id        : i,
+								start     : eventList.items[i].start.dateTime,
+								end       : eventList.items[i].end.dateTime,
+								allDay    : false,
+								google_id : eventList.items[i].google_id
+							});
+						}
+					}
+					return cb();
+				});
+			}, function(err) {
+				if(err) return res.json({msg:"ERROR " + err},500);
+				return res.json(all_events);
+			});
+		} else {
+			return res.send(404, "Only GET");
 		}
 	},
 	create : function (req, res) {

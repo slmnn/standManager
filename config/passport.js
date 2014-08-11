@@ -2,6 +2,9 @@
 var passport    = require('passport'),
   LocalStrategy = require('passport-local').Strategy;
 
+var gcal = require('google-calendar');
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+
 if(process.env.USE_BCRYPT == 'true') {
   var bcrypt = require('bcrypt');
 } else {
@@ -47,9 +50,22 @@ passport.use(new LocalStrategy(
   })
 );
 
+
 module.exports = {
  express: {
     customMiddleware: function(app){
+      passport.use(new GoogleStrategy({
+          clientID: sails.config.google_consumer_key,
+          clientSecret: sails.config.google_consumer_secret,
+          callbackURL: "http://localhost:1337/auth/gcalendar",
+          scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar']
+        },
+        function(accessToken, refreshToken, profile, done) {
+          console.log("MIDDLEWARE: ", accessToken, refreshToken, profile);
+          profile.accessToken = accessToken;
+          return done(null, profile);
+        }
+      ));
       app.use(passport.initialize());
       app.use(passport.session());
     }

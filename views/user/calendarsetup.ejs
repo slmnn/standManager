@@ -1,0 +1,38 @@
+<%- partial('../partials/header') %>
+
+<div class="container">
+	<div class="page-header">
+    <h2><%= (current_user ? current_user[0].firstname : 'unknown') %> <%= (current_user ? current_user[0].lastname : 'unknown') %> <small><%= i18n('Google Calendar setup') %></small></h2>
+  </div>
+  
+	<form class="form-horizontal" action="google_calendar_list" method="post">
+		<fieldset>
+
+			<legend><%= i18n('Select calendars to be imported') %></legend>
+			<div class="form-group">
+			  <label class="control-label" for="input_calendar_checkbox" id="calendar_select_label"><%= i18n('Select calendars') %></label>
+			  <% if(error.lenght > 0) { %><p>ERROR: <%= error %> </p><% } %>
+			  <div id="c_b">
+			  	<% _.each(items, function (item) { %>
+			  		<input type="checkbox" value="<%= item.id %>"><%= item.summary %><br>
+			  	<% }); %>
+			  </div>
+			  <input name="input_calendars" id="input_calendars"></input>
+			</div>
+			<div class="form-group">
+			    <button id="input_submit" name="input_submit" class="btn btn-primary pull-right"><%= i18n('Set') %></button>
+			</div>
+		</fieldset>
+	</form>
+
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#c_b :checkbox").change(function(event){
+		$('#input_calendars').val($("#c_b :checkbox:checked").map(function () {
+			return this.value;}
+		).get().join(","));		
+	})
+})
+</script>

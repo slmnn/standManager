@@ -7,6 +7,7 @@
   
 	<div id='calendar' class="calendar"></div>
 
+	<button style="margin-top: 5px" type="button" disabled class="btn btn-danger pull-right" id="google_events_to_reservations">Turn all Google events into reservations</button>
 </div>
 
 <!-- Modal -->
@@ -34,8 +35,31 @@
 var user_id = "<%= user.id %>";
 var user_fullname = "<%= user.firstname %> <%= user.lastname %>";
 var last_calendar_event_clicked = {};
+var google_events = [];
 
 $(document).ready(function() {
+	google_events_to_reservations
+	$( "#google_events_to_reservations" ).click(function( event ) {
+		var box = bootbox.confirm("This will generate " + google_events.length + " new reservations. Are you sure?", function(ok) {
+			if(ok) {
+				$.each(google_events, function(i, item){
+					$.post( "/reservation/create", 
+						{ 
+							input_title: item.title,
+							input_all_day: "",
+							input_start: moment(item.start).format(),
+							input_end: moment(item.end).format()
+						} 
+					).done(function() {
+				  }).fail(function(err) {
+				    var box = bootbox.alert("ERROR: " + err);
+				  });	
+				});
+				$('#calendar').fullCalendar( 'refetchEvents' );		
+			}
+		})
+	});
+
 	$( "#accept_shift_button" ).click(function( event ) {
 	  // Stop form from submitting normally
 	  event.preventDefault();
@@ -152,6 +176,17 @@ $(document).ready(function() {
 		  });				
 
 		},
+		loading : function(isLoading, view) {
+			if(isLoading) {
+				google_events = [];
+				$('#google_events_to_reservations').prop('disabled', true);
+			} else {
+				if(google_events.length > 0) {
+					$('#google_events_to_reservations').prop('disabled', false);
+					$('#google_events_to_reservations').prop('enabled', true);
+				}
+			}
+		},
 	  eventSources: [
 	    {
 	    	url: "../shifts/" + user_id,
@@ -173,7 +208,20 @@ $(document).ready(function() {
         },
         eventDataTransform: function(event) {
         	event.type = "reservation";
+        	event.color = 'red';
+        	return event;
+        }
+      },
+      {
+	    	url: "../google_calendar_imported/" + user_id,
+	    	dataType: 'json',
+	    	error: function(err) {
+	    		var box = bootbox.alert("ERROR: " + err.msg);
+        },
+        eventDataTransform: function(event) {
+        	event.type = "gcalevent";
         	event.color = 'grey';
+        	google_events.push(event);
         	return event;
         }
       }
