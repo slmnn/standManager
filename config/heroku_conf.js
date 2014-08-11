@@ -7,5 +7,8 @@ module.exports = {
   sc_password : process.env.SC_PASSWORD,
 
   INVITATION_EMAIL_USER: process.env.SMTP_USERNAME,
-  INVITATION_EMAIL_PASSWORD: process.env.SMTP_PASSWORD
+  INVITATION_EMAIL_PASSWORD: process.env.SMTP_PASSWORD,
+
+  google_consumer_key: process.env.GOOGLE_KEY,
+  google_consumer_secret: process.env.GOOGLE_SECRET
 }
