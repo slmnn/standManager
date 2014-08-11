@@ -15,11 +15,7 @@
  * @docs        :: http://sailsjs.org/#!documentation/controllers
  */
 
-var pageOptions = {
-  activePage : '',
-  breadcrumbs : [{name : 'User management', link : null}],
-  appliedFilters : []
-};
+var ical = require('ical');
 
 module.exports = {
 	home : function (req, res) {
@@ -29,6 +25,24 @@ module.exports = {
 			return res.send("Forbidden!", 403);
 		}
 		return res.redirect("/user/find/" + req.user[0].id)
+	},
+	resign : function(req, res) {
+		if(req.method == 'POST') {
+			User.findOne({id:req.user[0].id}).exec(function(err, user) {
+				if(err || user==null) return res.json({msg:"ERROR: " + err});
+				var index = user.stands.indexOf(req.params.id ? req.params.id : 'id_not_provided');
+				if(index != -1) {
+					user.stands.splice(index, 1);
+				} else {
+					return res.json({msg:"ERROR: You are not member of this stand"});
+				}
+				console.log("New stands: ", user.stands.toString());
+				User.update({id:req.user[0].id},{stands:user.stands}, function(err, new_user) {
+					if(err || new_user==null) return res.json({msg:"ERROR: " + err});
+					return res.json({msg:"You have resigned from the stand!"});
+				})
+			});
+		}
 	},
 	find : function (req, res) {
 		if(req.user[0].id != req.params.id && req.user[0].username != 'admin') {

@@ -39,6 +39,7 @@ module.exports.routes = {
 
   'get /home': 'UserController.home',
   'get /user/shifts/:id': 'UserController.findShifts',
+  'get /user/resign/:id': 'UserController.resign',
 
   'get /stand/kickuser/:id': 'StandController.kickUser',
   'get /stand/possibleusers/:id': 'StandController.findUsersForShift',

@@ -18,6 +18,11 @@
 &markers=<%= i.lat %>,<%= i.lng %>" /><br />
         <small><i class="fa fa-map-marker"></i> <i><%= i.location %> (<a target="_blank" href="http://maps.google.com/maps?q=<%= i.lat %>,<%= i.lng %>&ll=<%= i.lat %>,<%= i.lng %>&z=14"><%= i18n('Show map') %></a>)</i></small>
       </div>
+      <div class="panel-footer clearfix">
+        <div>
+          <button url="/user/resign/<%= i.id %>" standName="<%= i.name %>" class="btn btn-danger btn-xs resign_button"><%= i18n('Resign') %></button>
+        </div>
+      </div>
     </div>
   <% }) %>
 
@@ -51,3 +56,35 @@
     </ul>
   </div>
 </div>
+
+<script>
+// Attach a submit handler to the form
+$( ".resign_button" ).click(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+  
+  var name = $(this).attr( "standName" );
+  var url = $(this).attr( "url" );
+  bootbox.confirm("Are you sure you want to resign from stand " + name + "?", function(ok) {
+    if(ok) {
+      // Send the data using post
+      var posting = $.post( url, 
+        { 
+          input_action: 'resign'
+        } 
+      ).done(function(data) {
+        console.log(data);
+        var content = data.msg;
+        var box = bootbox.alert('' + content, function() {
+          window.location.replace("/stand");
+        });
+      }).fail(function(err) {
+        var box = bootbox.alert("ERROR: " + err.msg);
+      });
+    }
+  });
+
+});
+
+</script>
