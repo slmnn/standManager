@@ -47,15 +47,17 @@ $(document).ready(function() {
 						{ 
 							input_title: item.title,
 							input_all_day: "",
-							input_start: moment(item.start).format(),
-							input_end: moment(item.end).format()
+							input_start: moment(item.start).format("YYYY-MM-DDTHH:mm"),
+							input_end: moment(item.end).format("YYYY-MM-DDTHH:mm")
 						} 
 					).done(function() {
 				  }).fail(function(err) {
 				    var box = bootbox.alert("ERROR: " + err);
 				  });	
 				});
-				$('#calendar').fullCalendar( 'refetchEvents' );		
+				setTimeout(function(){
+					$('#calendar').fullCalendar( 'refetchEvents' );		
+				}, 2000)
 			}
 		})
 	});
