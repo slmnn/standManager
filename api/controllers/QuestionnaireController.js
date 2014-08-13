@@ -58,13 +58,28 @@ module.exports = {
 				});
 			};
 			var findUser = function(cb) {
-				User.findOne({email:questionnaire.email}).exec(function(err, u) {
+				var query = {};
+				query.email = questionnaire.email;
+				if(questionnaire.user_id) query.id = questionnaire.user_id;
+				User.findOne(query).exec(function(err, u) {
 					if(err || u==null) return res.send("ERROR" + err, 500);
 					user = u;
-					return cb();
+					User.update(
+					{id:u.id}, 
+					{
+						male : req.body.input_gender == 'male' ? true : false,
+						tel  : req.body.input_tel ? req.body.input_tel : ''
+					},
+						function(err, new_u) {
+							if(err || new_u==null) return res.send("ERROR" + err, 500);
+							user = new_u[0];
+							console.log(user);
+							return cb(err);
+						})
 				});
 			};
 			async.series([findQuestionnaire, findUser], function(err){
+				var reservation_table = [[],[],[],[],[],[],[]];
 				if(err) return res.send("ERROR" + err, 500);
 				for(var weekday = 0; weekday < week_available.length; weekday++) {
 					for(var start_index = 0; start_index < shift_start_times.length; start_index++) {
@@ -76,6 +91,9 @@ module.exports = {
 								end.setHours(parseInt(shift_start_times[start_index])+2);
 								new_reservations.push(createReservation(start, end, user));
 							}
+							reservation_table[weekday].push('reserved');
+						} else {
+							reservation_table[weekday].push('available');
 						}
 					}
 				}
@@ -93,7 +111,13 @@ module.exports = {
 						})
 					}, function(err) {
 						if(err) res.send("ERROR" + err);
-						return res.view({response:req.body, new_reservations: new_reservations});
+						return res.view(
+							{
+								response:req.body, 
+							  new_reservations: new_reservations, 
+							  reservation_table: reservation_table
+							}
+						);
 					});					
 				});
 			});
@@ -106,7 +130,10 @@ module.exports = {
 				Stand.findOne(i.stand_id).exec(function(err, s) {
 					if(err || s==null) return res.send("ERROR" + err, 500);
 					if(req.query.email == i.email) {
-						User.findOne({email: i.email}).exec(function(err, u){
+						var query = {};
+						query.email = i.email;
+						if(i.user_id) query.id = i.user_id;
+						User.findOne(query).exec(function(err, u){
 							if(err) return res.send("ERROR" + err, 500);
 							return res.view({questionnaire:i, stand: s, user: u});	
 						});	
@@ -162,6 +189,7 @@ module.exports = {
 				created_by: req.user[0].id + "",
 				created_by_name: req.body.input_name,
 				stand_id: req.body.input_stand_id,
+				user_id: req.body.input_user_id ? req.body.input_user_id : '',
 				message: req.body.input_message,
 				title: req.body.input_title,
 				email: req.body.input_email,
@@ -181,7 +209,7 @@ module.exports = {
 				});
 				// setup e-mail data with unicode symbols
 				console.log(JSON.stringify(i));
-				var link = 'http://' + req.headers.host + '/questionnaire/find/' + i.id + '?email=' + i.email;
+				var link = 'http://' + req.headers.host + '/questionnaire/find/' + i.id + '?email=' + i.email + '&user_id=' + i.user_id;
 				var login_link = 'http://' + req.headers.host + '/login';
 				var html_message_with_link = i.message.replace("_questionnairelink", '<a href="'+link+'">' + link + '</a>');
 				html_message_with_link = html_message_with_link.replace("_myfullname", req.body.input_name);
@@ -199,7 +227,18 @@ module.exports = {
 			    if(error){
 			      return res.json({msg:'Sending questionnaire failed! ERROR: ' + error});	
 			    }else{
-			      return res.json({msg:'Questionnaire sent to ' + mailOptions.to + '!'});		
+			    	var query = {};
+			    	if(i.user_id) query.id = i.user_id;
+			    	query.email = i.email;
+			    	User.findOne(query).exec(function(err, u){
+			    		if(err || u == null) return res.json({msg:err});
+			    		// TODO: Create new user account and send invitation link
+			    		if(u == null) return res.json({msg:'New user account was created and questionnaire was sent.'})
+				    	if(typeof u.active_questionnaries == 'undefined') u.active_questionnaries = [];
+				    	User.update({id:i.user_id},{active_questionnaries:u.active_questionnaries.push(i.id)}, function(err, new_u){
+				    		return res.json({msg:'Questionnaire sent to ' + mailOptions.to + '!'});
+				    	});
+			    	});
 			    }
 				});
 			});	

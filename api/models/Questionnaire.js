@@ -23,6 +23,9 @@ module.exports = {
   	email: {
   		type:'email'
   	},
+    user_id: {
+      type:'string'
+    },
   	stand_id:  {
   		type:'string'
   	},

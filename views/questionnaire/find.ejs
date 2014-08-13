@@ -2,251 +2,288 @@
 
 <div class="container">
 
-<form class="form-horizontal" action="../submit/<%= questionnaire.id %>" method="POST">
+<form class="form-horizontal" action="../submit/<%= questionnaire.id %>" name="questionnaire_form" method="POST">
 <fieldset>
 
 <!-- Form Name -->
-<legend><%= i18n("Fill questionnaire for") %> <%= stand.name %></legend>
+<legend><%= i18n("Questionnaire for") %> <%= stand.name %></legend>
 
-<!-- Text input-->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_name"><%= i18n("Name") %></label>  
-  <div class="col-md-4">
-  <input id="input_name" name="input_name" type="text" placeholder="John Doe" class="form-control input-md" required="">
-    
+<div class="panel panel-default">
+  <div class="panel-heading"><%= i18n("Fill basic information") %></div>
+  <div class="panel-body">
+
+  <!-- Text input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_name"><%= i18n("Name") %></label>  
+    <div class="col-md-4">
+    <input id="input_name" name="input_name" value="<%= user.firstname ? user.firstname + ' ' +  user.lastname : '' %>" type="text" placeholder="John Doe" class="form-control input-md" required="">
+      
+    </div>
+  </div>
+
+  <!-- Text input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_tel"><%= i18n("Telephone") %></label>  
+    <div class="col-md-4">
+    <input id="input_tel" name="input_tel" type="tel" placeholder="123 123 4567" value="<%= user.tel ? user.tel : '' %>" class="form-control input-md" required="">
+      
+    </div>
+  </div>
+
+  <!-- Multiple Radios (inline) -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_gender"><%= i18n("Gender") %></label>
+    <div class="col-md-4"> 
+      <label class="radio-inline" for="input_gender-0">
+        <input type="radio" name="input_gender" id="input_gender-0" value="male" <% if(user.male){ %>checked="checked" <% } %>>
+        <%= i18n("male") %>
+      </label> 
+      <label class="radio-inline" for="input_gender-1">
+        <input type="radio" name="input_gender" id="input_gender-1" value="female" <% if(!user.male){ %>checked="checked" <% } %>>
+        <%= i18n("female") %>
+      </label>
+    </div>
+  </div>
   </div>
 </div>
 
-<!-- Text input-->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_tel"><%= i18n("Telephone") %></label>  
-  <div class="col-md-4">
-  <input id="input_tel" name="input_tel" type="tel" placeholder="123 123 4567" class="form-control input-md" required="">
-    
-  </div>
-</div>
 
-<!-- Multiple Radios (inline) -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_gender"><%= i18n("Gender") %></label>
-  <div class="col-md-4"> 
-    <label class="radio-inline" for="input_gender-0">
-      <input type="radio" name="input_gender" id="input_gender-0" value="male" checked="checked">
-      <%= i18n("male") %>
-    </label> 
-    <label class="radio-inline" for="input_gender-1">
-      <input type="radio" name="input_gender" id="input_gender-1" value="female">
-      <%= i18n("female") %>
-    </label>
-  </div>
-</div>
-
-<!-- Multiple Checkboxes (inline) -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_monday"><%= i18n("Monday (select suitable times)") %></label>
-  <div class="col-md-4">
-    <label class="checkbox-inline" for="input_monday-0">
-      <input type="checkbox" name="input_monday" id="input_monday-0" value="8">
-      8-10
-    </label>
-    <label class="checkbox-inline" for="input_monday-1">
-      <input type="checkbox" name="input_monday" id="input_monday-1" value="10">
-      10-12
-    </label>
-    <label class="checkbox-inline" for="input_monday-2">
-      <input type="checkbox" name="input_monday" id="input_monday-2" value="12">
-      12-14
-    </label>
-    <label class="checkbox-inline" for="input_monday-3">
-      <input type="checkbox" name="input_monday" id="input_monday-3" value="14">
-      14-16
-    </label>
-    <label class="checkbox-inline" for="input_monday-4">
-      <input type="checkbox" name="input_monday" id="input_monday-4" value="16">
-      16-18
-    </label>
-  </div>
-</div>
-
-<!-- Multiple Checkboxes (inline) -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_tuesday"><%= i18n("Tuesday (select suitable times)") %></label>
-  <div class="col-md-4">
-    <label class="checkbox-inline" for="input_tuesday-0">
-      <input type="checkbox" name="input_tuesday" id="input_tuesday-0" value="8">
-      8-10
-    </label>
-    <label class="checkbox-inline" for="input_tuesday-1">
-      <input type="checkbox" name="input_tuesday" id="input_tuesday-1" value="10">
-      10-12
-    </label>
-    <label class="checkbox-inline" for="input_tuesday-2">
-      <input type="checkbox" name="input_tuesday" id="input_tuesday-2" value="12">
-      12-14
-    </label>
-    <label class="checkbox-inline" for="input_tuesday-3">
-      <input type="checkbox" name="input_tuesday" id="input_tuesday-3" value="14">
-      14-16
-    </label>
-    <label class="checkbox-inline" for="input_tuesday-4">
-      <input type="checkbox" name="input_tuesday" id="input_tuesday-4" value="16">
-      16-18
-    </label>
-  </div>
-</div>
-
-<!-- Multiple Checkboxes (inline) -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_wednesday"><%= i18n("Wednesday (select suitable times)") %></label>
-  <div class="col-md-4">
-    <label class="checkbox-inline" for="input_wednesday-0">
-      <input type="checkbox" name="input_wednesday" id="input_wednesday-0" value="8">
-      8-10
-    </label>
-    <label class="checkbox-inline" for="input_wednesday-1">
-      <input type="checkbox" name="input_wednesday" id="input_wednesday-1" value="10">
-      10-12
-    </label>
-    <label class="checkbox-inline" for="input_wednesday-2">
-      <input type="checkbox" name="input_wednesday" id="input_wednesday-2" value="12">
-      12-14
-    </label>
-    <label class="checkbox-inline" for="input_wednesday-3">
-      <input type="checkbox" name="input_wednesday" id="input_wednesday-3" value="14">
-      14-16
-    </label>
-    <label class="checkbox-inline" for="input_wednesday-4">
-      <input type="checkbox" name="input_wednesday" id="input_wednesday-4" value="16">
-      16-18
-    </label>
-  </div>
-</div>
-
-<!-- Multiple Checkboxes (inline) -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_thursday"><%= i18n("Thursday (select suitable times)") %></label>
-  <div class="col-md-4">
-    <label class="checkbox-inline" for="input_thursday-0">
-      <input type="checkbox" name="input_thursday" id="input_thursday-0" value="8">
-      8-10
-    </label>
-    <label class="checkbox-inline" for="input_thursday-1">
-      <input type="checkbox" name="input_thursday" id="input_thursday-1" value="10">
-      10-12
-    </label>
-    <label class="checkbox-inline" for="input_thursday-2">
-      <input type="checkbox" name="input_thursday" id="input_thursday-2" value="12">
-      12-14
-    </label>
-    <label class="checkbox-inline" for="input_thursday-3">
-      <input type="checkbox" name="input_thursday" id="input_thursday-3" value="14">
-      14-16
-    </label>
-    <label class="checkbox-inline" for="input_thursday-4">
-      <input type="checkbox" name="input_thursday" id="input_thursday-4" value="16">
-      16-18
-    </label>
-  </div>
-</div>
-
-<!-- Multiple Checkboxes (inline) -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_friday"><%= i18n("Friday (select suitable times)") %></label>
-  <div class="col-md-4">
-    <label class="checkbox-inline" for="input_friday-0">
-      <input type="checkbox" name="input_friday" id="input_friday-0" value="8">
-      8-10
-    </label>
-    <label class="checkbox-inline" for="input_friday-1">
-      <input type="checkbox" name="input_friday" id="input_friday-1" value="10">
-      10-12
-    </label>
-    <label class="checkbox-inline" for="input_friday-2">
-      <input type="checkbox" name="input_friday" id="input_friday-2" value="12">
-      12-14
-    </label>
-    <label class="checkbox-inline" for="input_friday-3">
-      <input type="checkbox" name="input_friday" id="input_friday-3" value="14">
-      14-16
-    </label>
-    <label class="checkbox-inline" for="input_friday-4">
-      <input type="checkbox" name="input_friday" id="input_friday-4" value="16">
-      16-18
-    </label>
-  </div>
-</div>
-
-<!-- Multiple Checkboxes (inline) -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_saturday"><%= i18n("Saturday (select suitable times)") %></label>
-  <div class="col-md-4">
-    <label class="checkbox-inline" for="input_saturday-0">
-      <input type="checkbox" name="input_saturday" id="input_saturday-0" value="8">
-      8-10
-    </label>
-    <label class="checkbox-inline" for="input_saturday-1">
-      <input type="checkbox" name="input_saturday" id="input_saturday-1" value="10">
-      10-12
-    </label>
-    <label class="checkbox-inline" for="input_saturday-2">
-      <input type="checkbox" name="input_saturday" id="input_saturday-2" value="12">
-      12-14
-    </label>
-    <label class="checkbox-inline" for="input_saturday-3">
-      <input type="checkbox" name="input_saturday" id="input_saturday-3" value="14">
-      14-16
-    </label>
-    <label class="checkbox-inline" for="input_saturday-4">
-      <input type="checkbox" name="input_saturday" id="input_saturday-4" value="16">
-      16-18
-    </label>
-  </div>
-</div>
-
-<!-- Multiple Checkboxes (inline) -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_sunday"><%= i18n("Sunday (select suitable times)") %></label>
-  <div class="col-md-4">
-    <label class="checkbox-inline" for="input_sunday-0">
-      <input type="checkbox" name="input_sunday" id="input_sunday-0" value="8">
-      8-10
-    </label>
-    <label class="checkbox-inline" for="input_sunday-1">
-      <input type="checkbox" name="input_sunday" id="input_sunday-1" value="10">
-      10-12
-    </label>
-    <label class="checkbox-inline" for="input_sunday-2">
-      <input type="checkbox" name="input_sunday" id="input_sunday-2" value="12">
-      12-14
-    </label>
-    <label class="checkbox-inline" for="input_sunday-3">
-      <input type="checkbox" name="input_sunday" id="input_sunday-3" value="14">
-      14-16
-    </label>
-    <label class="checkbox-inline" for="input_sunday-4">
-      <input type="checkbox" name="input_sunday" id="input_sunday-4" value="16">
-      16-18
-    </label>
-  </div>
-</div>
-
-<!-- Text input-->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="input_valid"><%= i18n("My answers are valid until") %></label>  
-  <div class="col-md-4">
-  <input id="input_valid" name="input_valid" type="date" class="form-control input-md" required="">
-    
-  </div>
-</div>
-<div class="form-group">
-  <div class="col-md-4"></div>  
-  <div class="col-md-4">
-  <button id="input_submit" name="input_submit" value="submit" class="btn btn-primary"><%= i18n('Submit') %></button>    
+<div class="panel panel-default">
+  <div class="panel-heading"><%= i18n('Select suitable times for you') %></div>
+  <div class="panel-body">
+  <!-- Multiple Checkboxes (inline) -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_monday"><%= i18n("Monday") %></label>
+    <div class="col-md-4">
+      <label class="checkbox-inline" for="input_monday-0">
+        <input type="checkbox" name="input_monday" id="input_monday-0" value="8">
+        8-10
+      </label>
+      <label class="checkbox-inline" for="input_monday-1">
+        <input type="checkbox" name="input_monday" id="input_monday-1" value="10">
+        10-12
+      </label>
+      <label class="checkbox-inline" for="input_monday-2">
+        <input type="checkbox" name="input_monday" id="input_monday-2" value="12">
+        12-14
+      </label>
+      <label class="checkbox-inline" for="input_monday-3">
+        <input type="checkbox" name="input_monday" id="input_monday-3" value="14">
+        14-16
+      </label>
+      <label class="checkbox-inline" for="input_monday-4">
+        <input type="checkbox" name="input_monday" id="input_monday-4" value="16">
+        16-18
+      </label>
+    </div>
   </div>
 
+  <!-- Multiple Checkboxes (inline) -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_tuesday"><%= i18n("Tuesday") %></label>
+    <div class="col-md-4">
+      <label class="checkbox-inline" for="input_tuesday-0">
+        <input type="checkbox" name="input_tuesday" id="input_tuesday-0" value="8">
+        8-10
+      </label>
+      <label class="checkbox-inline" for="input_tuesday-1">
+        <input type="checkbox" name="input_tuesday" id="input_tuesday-1" value="10">
+        10-12
+      </label>
+      <label class="checkbox-inline" for="input_tuesday-2">
+        <input type="checkbox" name="input_tuesday" id="input_tuesday-2" value="12">
+        12-14
+      </label>
+      <label class="checkbox-inline" for="input_tuesday-3">
+        <input type="checkbox" name="input_tuesday" id="input_tuesday-3" value="14">
+        14-16
+      </label>
+      <label class="checkbox-inline" for="input_tuesday-4">
+        <input type="checkbox" name="input_tuesday" id="input_tuesday-4" value="16">
+        16-18
+      </label>
+    </div>
+  </div>
+
+  <!-- Multiple Checkboxes (inline) -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_wednesday"><%= i18n("Wednesday") %></label>
+    <div class="col-md-4">
+      <label class="checkbox-inline" for="input_wednesday-0">
+        <input type="checkbox" name="input_wednesday" id="input_wednesday-0" value="8">
+        8-10
+      </label>
+      <label class="checkbox-inline" for="input_wednesday-1">
+        <input type="checkbox" name="input_wednesday" id="input_wednesday-1" value="10">
+        10-12
+      </label>
+      <label class="checkbox-inline" for="input_wednesday-2">
+        <input type="checkbox" name="input_wednesday" id="input_wednesday-2" value="12">
+        12-14
+      </label>
+      <label class="checkbox-inline" for="input_wednesday-3">
+        <input type="checkbox" name="input_wednesday" id="input_wednesday-3" value="14">
+        14-16
+      </label>
+      <label class="checkbox-inline" for="input_wednesday-4">
+        <input type="checkbox" name="input_wednesday" id="input_wednesday-4" value="16">
+        16-18
+      </label>
+    </div>
+  </div>
+
+  <!-- Multiple Checkboxes (inline) -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_thursday"><%= i18n("Thursday") %></label>
+    <div class="col-md-4">
+      <label class="checkbox-inline" for="input_thursday-0">
+        <input type="checkbox" name="input_thursday" id="input_thursday-0" value="8">
+        8-10
+      </label>
+      <label class="checkbox-inline" for="input_thursday-1">
+        <input type="checkbox" name="input_thursday" id="input_thursday-1" value="10">
+        10-12
+      </label>
+      <label class="checkbox-inline" for="input_thursday-2">
+        <input type="checkbox" name="input_thursday" id="input_thursday-2" value="12">
+        12-14
+      </label>
+      <label class="checkbox-inline" for="input_thursday-3">
+        <input type="checkbox" name="input_thursday" id="input_thursday-3" value="14">
+        14-16
+      </label>
+      <label class="checkbox-inline" for="input_thursday-4">
+        <input type="checkbox" name="input_thursday" id="input_thursday-4" value="16">
+        16-18
+      </label>
+    </div>
+  </div>
+
+  <!-- Multiple Checkboxes (inline) -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_friday"><%= i18n("Friday") %></label>
+    <div class="col-md-4">
+      <label class="checkbox-inline" for="input_friday-0">
+        <input type="checkbox" name="input_friday" id="input_friday-0" value="8">
+        8-10
+      </label>
+      <label class="checkbox-inline" for="input_friday-1">
+        <input type="checkbox" name="input_friday" id="input_friday-1" value="10">
+        10-12
+      </label>
+      <label class="checkbox-inline" for="input_friday-2">
+        <input type="checkbox" name="input_friday" id="input_friday-2" value="12">
+        12-14
+      </label>
+      <label class="checkbox-inline" for="input_friday-3">
+        <input type="checkbox" name="input_friday" id="input_friday-3" value="14">
+        14-16
+      </label>
+      <label class="checkbox-inline" for="input_friday-4">
+        <input type="checkbox" name="input_friday" id="input_friday-4" value="16">
+        16-18
+      </label>
+    </div>
+  </div>
+
+  <!-- Multiple Checkboxes (inline) -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_saturday"><%= i18n("Saturday") %></label>
+    <div class="col-md-4">
+      <label class="checkbox-inline" for="input_saturday-0">
+        <input type="checkbox" name="input_saturday" id="input_saturday-0" value="8">
+        8-10
+      </label>
+      <label class="checkbox-inline" for="input_saturday-1">
+        <input type="checkbox" name="input_saturday" id="input_saturday-1" value="10">
+        10-12
+      </label>
+      <label class="checkbox-inline" for="input_saturday-2">
+        <input type="checkbox" name="input_saturday" id="input_saturday-2" value="12">
+        12-14
+      </label>
+      <label class="checkbox-inline" for="input_saturday-3">
+        <input type="checkbox" name="input_saturday" id="input_saturday-3" value="14">
+        14-16
+      </label>
+      <label class="checkbox-inline" for="input_saturday-4">
+        <input type="checkbox" name="input_saturday" id="input_saturday-4" value="16">
+        16-18
+      </label>
+    </div>
+  </div>
+
+  <!-- Multiple Checkboxes (inline) -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_sunday"><%= i18n("Sunday") %></label>
+    <div class="col-md-4">
+      <label class="checkbox-inline" for="input_sunday-0">
+        <input type="checkbox" name="input_sunday" id="input_sunday-0" value="8">
+        8-10
+      </label>
+      <label class="checkbox-inline" for="input_sunday-1">
+        <input type="checkbox" name="input_sunday" id="input_sunday-1" value="10">
+        10-12
+      </label>
+      <label class="checkbox-inline" for="input_sunday-2">
+        <input type="checkbox" name="input_sunday" id="input_sunday-2" value="12">
+        12-14
+      </label>
+      <label class="checkbox-inline" for="input_sunday-3">
+        <input type="checkbox" name="input_sunday" id="input_sunday-3" value="14">
+        14-16
+      </label>
+      <label class="checkbox-inline" for="input_sunday-4">
+        <input type="checkbox" name="input_sunday" id="input_sunday-4" value="16">
+        16-18
+      </label>
+    </div>
+  </div>
+
+
+  <div class="form-group">
+    <div class="col-md-4"></div> 
+    <div class="col-md-4">
+      <a onclick="javascript:checkAll('questionnaire_form', true);" class="btn btn-primary btn-xs" href="javascript:void();"><%= i18n('Select all') %></a>    
+      <a onclick="javascript:checkAll('questionnaire_form', false);" class="btn btn-xs btn-warning" href="javascript:void();"><%= i18n('Select none') %></a>    
+    </div>
+  </div>
+
+  <!-- Text input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="input_valid"><%= i18n("My answers are valid until") %></label>  
+    <div class="col-md-4">
+    <input id="input_valid" name="input_valid" type="date" class="form-control input-md" required="">
+      
+    </div>
+  </div>
 </div>
+</div>
+
+
+  <div class="form-group">
+    <div class="col-md-4"></div>  
+    <div class="col-md-4">
+    <button id="input_submit" name="input_submit" value="submit" class="btn btn-primary"><%= i18n('Submit your answers') %></button>    
+    </div>
+  </div>
 
 </fieldset>
 </form>
 
 </div>
+
+<script type="text/javascript" language="javascript">
+
+function checkAll(formname, checktoggle)
+{
+  var checkboxes = new Array(); 
+  checkboxes = document[formname].getElementsByTagName('input');
+ 
+  for (var i=0; i<checkboxes.length; i++)  {
+    if (checkboxes[i].type == 'checkbox')   {
+      checkboxes[i].checked = checktoggle;
+    }
+  }
+}
+</script>

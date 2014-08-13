@@ -24,8 +24,9 @@
 			  <label class="control-label" for="input_email"><%= i18n('User email') %> (<%= i18n('required') %>)</label>
 			  <div class="form-inline">
 	        <select id="input_user" name="input_user" class="form-control">
+	        	<option value="disabled" disabled selected><%= i18n('select existing user') %></option>
 	          <% _.each(stand_users, function (u) { %>
-	            <option value="<%= u.email %>"><%= u.firstname %> <%= u.lastname %></option>
+	            <option value="<%= u.id %>" email="<%= u.email %>"><%= u.firstname %> <%= u.lastname %></option>
 	          <% }) %>
 	        </select>		
 			    <input id="input_email" name="input_email" type="email" placeholder="john.doe@example.com" class="form-control">	
@@ -59,7 +60,7 @@ _myfullname
 
 <script>
 $("#input_user").change(function(event) {
-	$( "#questionnaire_form" ).find( "#input_email" ).val($( "#questionnaire_form" ).find( "#input_user" ).val());
+	$( "#questionnaire_form" ).find( "#input_email" ).val($( "#questionnaire_form" ).find( "#input_user :selected" ).attr('email'));
 });
 
 // Attach a submit handler to the form
@@ -72,6 +73,7 @@ $( "#questionnaire_form" ).submit(function( event ) {
   var $form = $( this ),
     input_name = $form.find( "#input_name" ).val(),
     input_stand_id = $form.find( "#input_stand_id" ).val(),
+    input_user_id = $form.find( "#input_user" ).val(),
     input_email = $form.find( "#input_email" ).val(),
     input_title = $form.find( "#input_title" ).val(),
     input_message = $form.find( "#input_message" ).val().replace(new RegExp('\n','g'), '<br />');
@@ -82,6 +84,7 @@ $( "#questionnaire_form" ).submit(function( event ) {
 		{ 
 			input_name: input_name,
 			input_stand_id: input_stand_id,
+			input_user_id: input_user_id,
 			input_title: input_title,
 			input_email: input_email,
 			input_message: input_message

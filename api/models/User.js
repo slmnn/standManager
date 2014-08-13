@@ -39,6 +39,10 @@ module.exports = {
       type: 'string'
     },
 
+    male: {
+      type: 'boolean'
+    },
+
     google_calendar_accessToken: {
       type: 'string'
     },
@@ -69,6 +73,10 @@ module.exports = {
     },
 
     available: {
+      type: 'array'
+    },
+
+    active_questionnaries: {
       type: 'array'
     },
 
