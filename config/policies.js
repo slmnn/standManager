@@ -21,7 +21,11 @@ module.exports.policies = {
   
   '*': "authenticated",
   UserController: {
-    "create": true
+    "create": false
+  },
+  InvitationController: {
+    "find": true,
+    "accept": true
   },
   QuestionnaireController: {
     "submit": true,
@@ -30,6 +34,7 @@ module.exports.policies = {
   AuthController: {
     '*': true,
   },
+
   '*':'locals'
   
 
