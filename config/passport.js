@@ -58,11 +58,12 @@ module.exports = {
           clientID: sails.config.google_consumer_key,
           clientSecret: sails.config.google_consumer_secret,
           callbackURL: sails.config.google_redirect_uri,
-          scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar']
+          scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar.readonly']
         },
         function(accessToken, refreshToken, profile, done) {
           console.log("MIDDLEWARE: ", accessToken, refreshToken, profile);
           profile.accessToken = accessToken;
+          profile.refreshToken = refreshToken;
           return done(null, profile);
         }
       ));

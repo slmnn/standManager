@@ -16,6 +16,7 @@
  */
 
 var gcal = require('google-calendar');
+var needle = require('needle');
 
 module.exports = {
 	home : function (req, res) {
@@ -111,15 +112,53 @@ module.exports = {
 	},
 	calendarsetup:  function(req, res) {
 		if(req.method == 'GET') {
-			if(req.user[0].google_calendar_accessToken == null || req.user[0].google_calendar_accessToken.length == 0) {
+			if(req.user[0].google_calendar_accessToken == null 
+				|| req.user[0].google_calendar_accessToken.length == 0 
+				|| req.user[0].google_calendar_refreshToken == null
+				|| req.user[0].google_calendar_refreshToken.length == 0
+				|| req.user[0].google_calendar_token_expires == null) {
 				return res.view({error:"Google calendar is not authorized!", items:[]});
 			}
-			console.log(req.user[0].google_calendar_accessToken);
-			var google_calendar = new gcal.GoogleCalendar(req.user[0].google_calendar_accessToken);
-		  google_calendar.calendarList.list(function(err, data) {
-		    if(err) return res.view({error:err, items : []});
-		    return res.view({items:data.items, error:''});
-		  });
+			var now = new Date();
+			var google_token_expired = new Date(req.user[0].google_calendar_token_expires);
+			var getRefreshToken = function(cb) {
+				return cb();
+			};
+			var accessToken = req.user[0].google_calendar_accessToken;
+			if(now > google_token_expired){
+				var getRefreshToken = function(cb) {
+					var post_data = {
+						client_id:sails.config.google_consumer_key,
+						client_secret:sails.config.google_consumer_secret,
+						refresh_token:req.user[0].google_calendar_refreshToken,
+						grant_type:'refresh_token'
+					};
+					needle.post('https://accounts.google.com/o/oauth2/token', post_data, 
+					  function(err, resp, body){
+					    console.log("NEW_ACCESS_TOKEN: ",body);
+					  	User.update({id:req.user[0].id},
+					  		{
+					  			google_calendar_accessToken  : body.access_token,
+					  		  google_calendar_token_expires: new Date(now.getTime() + (body.expires_in*1000))
+					  		},
+					  		function(err, new_user) {
+					  			accessToken = new_user.google_calendar_accessToken;
+									return cb();
+					  		});
+					});
+
+				};
+			}
+			var google_calendar = {};
+			async.series([getRefreshToken, function(cb) {
+				google_calendar = new gcal.GoogleCalendar(accessToken);
+				return cb();
+			}], function(err) {
+			  google_calendar.calendarList.list(function(err, data) {
+			    if(err) return res.view({error:err, items : []});
+			    return res.view({items:data.items, error:''});
+			  });
+			});
 		}
 	},
 	google_calendar_list: function(req, res) {
@@ -145,46 +184,86 @@ module.exports = {
 		if(req.method == 'GET') {
 			var start = new Date(moment(req.query.start));
 			var end = new Date(moment(req.query.end));
-			if(req.user[0].google_calendar_imported == null || req.user[0].google_calendar_imported.length == 0) {
+			if(req.user[0].google_calendar_accessToken == null 
+				|| req.user[0].google_calendar_accessToken.length == 0 
+				|| req.user[0].google_calendar_refreshToken == null
+				|| req.user[0].google_calendar_refreshToken.length == 0
+				|| req.user[0].google_calendar_token_expires == null) {
 				return res.json([]);
 			}
-			var google_calendar = new gcal.GoogleCalendar(req.user[0].google_calendar_accessToken);
-			var all_events = [];
-			var calendars = req.user[0].google_calendar_imported;
-			async.forEach(calendars, function(calendar, cb) {
-				console.log("Fetching: ", calendar);
-				google_calendar.events.list(calendar, {'timeMin': start.toISOString(), 'timeMax': end.toISOString()}, function(err, eventList){
-					if(err) {
-						console.log("ERROR: ", JSON.stringify(err));
-						return cb(err)
+			var now = new Date();
+			var google_token_expired = new Date(req.user[0].google_calendar_token_expires);
+			var getRefreshToken = function(cb) {
+				return cb();
+			};
+			var accessToken = req.user[0].google_calendar_accessToken;
+			if(now > google_token_expired){
+				var getRefreshToken = function(cb) {
+					var post_data = {
+						client_id:sails.config.google_consumer_key,
+						client_secret:sails.config.google_consumer_secret,
+						refresh_token:req.user[0].google_calendar_refreshToken,
+						grant_type:'refresh_token'
 					};
-					console.log("GOOGLE EVENTS: " + eventList.items.length);
-					for(var i = 0; i < eventList.items.length; i++) {
-						if(eventList.items[i].start.date != null) {
-							all_events.push({
-								title     : eventList.items[i].summary,
-								id        : i,
-								start     : eventList.items[i].start.date + 'T00:00:00',
-								end       : eventList.items[i].end.date + 'T00:00:00',
-								allDay    : false,
-								google_id : eventList.items[i].google_id
-							});
-						} else {
-							all_events.push({
-								title     : eventList.items[i].summary,
-								id        : i,
-								start     : eventList.items[i].start.dateTime,
-								end       : eventList.items[i].end.dateTime,
-								allDay    : false,
-								google_id : eventList.items[i].google_id
-							});
+					needle.post('https://accounts.google.com/o/oauth2/token', post_data, 
+					  function(err, resp, body){
+					    console.log("NEW_ACCESS_TOKEN: ",body);
+					  	User.update({id:req.user[0].id},
+					  		{
+					  			google_calendar_accessToken  : body.access_token,
+					  		  google_calendar_token_expires: new Date(now.getTime() + (body.expires_in*1000))
+					  		},
+					  		function(err, new_user) {
+					  			accessToken = new_user.google_calendar_accessToken;
+									return cb();
+					  		});
+					});
+
+				};
+			}
+			var google_calendar = {};
+			async.series([getRefreshToken, function(cb) {
+				google_calendar = new gcal.GoogleCalendar(accessToken);
+				return cb();
+			}], function(err) {
+				var all_events = [];
+				if(req.user[0].google_calendar_imported == null) return res.json([]);
+				var calendars = req.user[0].google_calendar_imported;
+				async.forEach(calendars, function(calendar, cb) {
+					console.log("Fetching: ", calendar);
+					google_calendar.events.list(calendar, {'timeMin': start.toISOString(), 'timeMax': end.toISOString()}, function(err, eventList){
+						if(err) {
+							console.log("ERROR: ", JSON.stringify(err));
+							return cb(err)
+						};
+						console.log("GOOGLE EVENTS: " + eventList.items.length);
+						for(var i = 0; i < eventList.items.length; i++) {
+							if(eventList.items[i].start.date != null) {
+								all_events.push({
+									title     : eventList.items[i].summary,
+									id        : i,
+									start     : eventList.items[i].start.date + 'T00:00:00',
+									end       : eventList.items[i].end.date + 'T00:00:00',
+									allDay    : false,
+									google_id : eventList.items[i].google_id
+								});
+							} else {
+								all_events.push({
+									title     : eventList.items[i].summary,
+									id        : i,
+									start     : eventList.items[i].start.dateTime,
+									end       : eventList.items[i].end.dateTime,
+									allDay    : false,
+									google_id : eventList.items[i].google_id
+								});
+							}
 						}
-					}
-					return cb();
-				});
-			}, function(err) {
-				if(err) return res.json([],200);
-				return res.json(all_events);
+						return cb();
+					});
+				}, function(err) {
+					if(err) return res.json([],200);
+					return res.json(all_events);
+				});				
 			});
 		} else {
 			return res.send(404, "Only GET");

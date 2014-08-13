@@ -23,18 +23,21 @@ module.exports = {
   // https://developers.google.com/
   // https://developers.google.com/accounts/docs/OAuth2Login#scope-param
   gcalendar: function (req, res) {
-    passport.authenticate('google', { failureRedirect: '/login', session: false, scope:['openid', 'email', 'https://www.googleapis.com/auth/calendar'] },
+    passport.authenticate('google', { failureRedirect: '/login', session: false, accessType: 'offline', scope:['openid', 'email', 'https://www.googleapis.com/auth/calendar.readonly'] },
       function (err, profile) {
         var google_calendar_accessToken = profile.accessToken;
+        var google_calendar_refreshToken = profile.refreshToken ? profile.refreshToken : req.user[0].google_calendar_refreshToken;
         var google_id = profile._json.email;
-        console.log("AUTH_CONTROLLER: ", profile, google_calendar_accessToken, req.query, req.params, req.user[0]);
         User.findOne(req.user[0].id).exec(function(err, user) {
           if(err || user == null) res.send("Authentication failed!!");
           var now = new Date();
+          var expires = new Date(now.getTime() + 3600*1000);
           User.update(
             {id: user.id}, 
             {
               google_calendar_accessToken:google_calendar_accessToken,
+              google_calendar_refreshToken:google_calendar_refreshToken,
+              google_calendar_token_expires:expires,
               google_id:google_id
             }, 
             function(err, new_user) {

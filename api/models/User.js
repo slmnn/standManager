@@ -35,8 +35,20 @@ module.exports = {
       type: 'string'
     },
 
+    tel: {
+      type: 'string'
+    },
+
     google_calendar_accessToken: {
       type: 'string'
+    },
+
+    google_calendar_refreshToken: {
+      type: 'string'
+    },
+
+    google_calendar_token_expires: {
+      type: 'datetime'
     },
 
     google_id: {
