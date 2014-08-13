@@ -13,7 +13,8 @@ module.exports = {
 					user_id: req.user[0].id,
 					allDay: req.body.input_all_day == "all_day_true" ? true : false,
 					start: moment(req.body.input_start),
-					end: moment(req.body.input_end)
+					end: moment(req.body.input_end),
+					origin_questionnaire: false
 				}
 			).exec(function(err, s){
 				console.log(err, s);

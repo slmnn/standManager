@@ -1,87 +1,252 @@
-<%- partial('../partials/header') %>
+
 
 <div class="container">
-	<form id="invite_user_form" action="create" method="post" role="form" class="form-horizontal" >
-		<fieldset>
 
-			<legend><%= i18n('Send new stand invitation') %></legend>
-			<div class="form-group">
-			  <label class="control-label" for="input_name"><%= i18n('Inviter name') %> (<%= i18n('required') %>)</label>
-			    <input id="input_name" name="input_name" type="text" readonly value="<%= user.firstname + ' ' + user.lastname %>" class="form-control">
-			</div>
+<form class="form-horizontal" action="../submit/<%= questionnaire.id %>" method="POST">
+<fieldset>
 
-	    <div class="form-group">
-	      <label class="control-label" for="input_stand_id"><%= i18n('Stand') %> (<%= i18n('required') %>)</label>
-	        <select id="input_stand_id" name="input_stand_id" class="form-control">
-	          <% _.each(stands, function (s) { %>
-	            <option value="<%= s.id %>"><%= s.name %></option>
-	          <% }) %>            
-	        </select>
-	    </div>
+<!-- Form Name -->
+<legend><%= i18n("Fill questionnaire for") %> <%= stand.name %></legend>
 
-			<div class="form-group">
-			  <label class="control-label" for="input_email"><%= i18n('Invitee email') %> (<%= i18n('required') %>)</label>
-			    <input id="input_email" name="input_email" type="email" placeholder="john.doe@example.com" class="form-control">
-			</div>
+<!-- Text input-->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_name"><%= i18n("Name") %></label>  
+  <div class="col-md-4">
+  <input id="input_name" name="input_name" type="text" placeholder="John Doe" class="form-control input-md" required="">
+    
+  </div>
+</div>
 
-			<div class="form-group">
-			  <label class="control-label" for="input_message"><%= i18n('Message') %> (<%= i18n('required') %>)</label>
-			    ​<textarea id="input_message" name="input_message" rows="10" class="form-control">
-Hi,
+<!-- Text input-->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_tel"><%= i18n("Telephone") %></label>  
+  <div class="col-md-4">
+  <input id="input_tel" name="input_tel" type="tel" placeholder="123 123 4567" class="form-control input-md" required="">
+    
+  </div>
+</div>
 
-I would like to invite you to a stand. Follow the link below to accept this invitation:
+<!-- Multiple Radios (inline) -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_gender"><%= i18n("Gender") %></label>
+  <div class="col-md-4"> 
+    <label class="radio-inline" for="input_gender-0">
+      <input type="radio" name="input_gender" id="input_gender-0" value="male" checked="checked">
+      <%= i18n("male") %>
+    </label> 
+    <label class="radio-inline" for="input_gender-1">
+      <input type="radio" name="input_gender" id="input_gender-1" value="female">
+      <%= i18n("female") %>
+    </label>
+  </div>
+</div>
 
-  _invitationlink 
+<!-- Multiple Checkboxes (inline) -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_monday"><%= i18n("Monday (select suitable times)") %></label>
+  <div class="col-md-4">
+    <label class="checkbox-inline" for="input_monday-0">
+      <input type="checkbox" name="input_monday" id="input_monday-0" value="8">
+      8-10
+    </label>
+    <label class="checkbox-inline" for="input_monday-1">
+      <input type="checkbox" name="input_monday" id="input_monday-1" value="10">
+      10-12
+    </label>
+    <label class="checkbox-inline" for="input_monday-2">
+      <input type="checkbox" name="input_monday" id="input_monday-2" value="12">
+      12-14
+    </label>
+    <label class="checkbox-inline" for="input_monday-3">
+      <input type="checkbox" name="input_monday" id="input_monday-3" value="14">
+      14-16
+    </label>
+    <label class="checkbox-inline" for="input_monday-4">
+      <input type="checkbox" name="input_monday" id="input_monday-4" value="16">
+      16-18
+    </label>
+  </div>
+</div>
 
-To accept the invitation you need to log in at _loginlink. If you do not have credentials you can sign up at _signuplink. 
+<!-- Multiple Checkboxes (inline) -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_tuesday"><%= i18n("Tuesday (select suitable times)") %></label>
+  <div class="col-md-4">
+    <label class="checkbox-inline" for="input_tuesday-0">
+      <input type="checkbox" name="input_tuesday" id="input_tuesday-0" value="8">
+      8-10
+    </label>
+    <label class="checkbox-inline" for="input_tuesday-1">
+      <input type="checkbox" name="input_tuesday" id="input_tuesday-1" value="10">
+      10-12
+    </label>
+    <label class="checkbox-inline" for="input_tuesday-2">
+      <input type="checkbox" name="input_tuesday" id="input_tuesday-2" value="12">
+      12-14
+    </label>
+    <label class="checkbox-inline" for="input_tuesday-3">
+      <input type="checkbox" name="input_tuesday" id="input_tuesday-3" value="14">
+      14-16
+    </label>
+    <label class="checkbox-inline" for="input_tuesday-4">
+      <input type="checkbox" name="input_tuesday" id="input_tuesday-4" value="16">
+      16-18
+    </label>
+  </div>
+</div>
 
-BR,
-_myfullname
-			  	</textarea>
-			</div>
+<!-- Multiple Checkboxes (inline) -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_wednesday"><%= i18n("Wednesday (select suitable times)") %></label>
+  <div class="col-md-4">
+    <label class="checkbox-inline" for="input_wednesday-0">
+      <input type="checkbox" name="input_wednesday" id="input_wednesday-0" value="8">
+      8-10
+    </label>
+    <label class="checkbox-inline" for="input_wednesday-1">
+      <input type="checkbox" name="input_wednesday" id="input_wednesday-1" value="10">
+      10-12
+    </label>
+    <label class="checkbox-inline" for="input_wednesday-2">
+      <input type="checkbox" name="input_wednesday" id="input_wednesday-2" value="12">
+      12-14
+    </label>
+    <label class="checkbox-inline" for="input_wednesday-3">
+      <input type="checkbox" name="input_wednesday" id="input_wednesday-3" value="14">
+      14-16
+    </label>
+    <label class="checkbox-inline" for="input_wednesday-4">
+      <input type="checkbox" name="input_wednesday" id="input_wednesday-4" value="16">
+      16-18
+    </label>
+  </div>
+</div>
 
-			<div class="form-group">
-			    <button id="input_submit" name="input_submit" class="btn btn-primary pull-right"><%= i18n('Send') %></button>
-			</div>
+<!-- Multiple Checkboxes (inline) -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_thursday"><%= i18n("Thursday (select suitable times)") %></label>
+  <div class="col-md-4">
+    <label class="checkbox-inline" for="input_thursday-0">
+      <input type="checkbox" name="input_thursday" id="input_thursday-0" value="8">
+      8-10
+    </label>
+    <label class="checkbox-inline" for="input_thursday-1">
+      <input type="checkbox" name="input_thursday" id="input_thursday-1" value="10">
+      10-12
+    </label>
+    <label class="checkbox-inline" for="input_thursday-2">
+      <input type="checkbox" name="input_thursday" id="input_thursday-2" value="12">
+      12-14
+    </label>
+    <label class="checkbox-inline" for="input_thursday-3">
+      <input type="checkbox" name="input_thursday" id="input_thursday-3" value="14">
+      14-16
+    </label>
+    <label class="checkbox-inline" for="input_thursday-4">
+      <input type="checkbox" name="input_thursday" id="input_thursday-4" value="16">
+      16-18
+    </label>
+  </div>
+</div>
 
-		</fieldset>
-	</form>
+<!-- Multiple Checkboxes (inline) -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_friday"><%= i18n("Friday (select suitable times)") %></label>
+  <div class="col-md-4">
+    <label class="checkbox-inline" for="input_friday-0">
+      <input type="checkbox" name="input_friday" id="input_friday-0" value="8">
+      8-10
+    </label>
+    <label class="checkbox-inline" for="input_friday-1">
+      <input type="checkbox" name="input_friday" id="input_friday-1" value="10">
+      10-12
+    </label>
+    <label class="checkbox-inline" for="input_friday-2">
+      <input type="checkbox" name="input_friday" id="input_friday-2" value="12">
+      12-14
+    </label>
+    <label class="checkbox-inline" for="input_friday-3">
+      <input type="checkbox" name="input_friday" id="input_friday-3" value="14">
+      14-16
+    </label>
+    <label class="checkbox-inline" for="input_friday-4">
+      <input type="checkbox" name="input_friday" id="input_friday-4" value="16">
+      16-18
+    </label>
+  </div>
+</div>
+
+<!-- Multiple Checkboxes (inline) -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_saturday"><%= i18n("Saturday (select suitable times)") %></label>
+  <div class="col-md-4">
+    <label class="checkbox-inline" for="input_saturday-0">
+      <input type="checkbox" name="input_saturday" id="input_saturday-0" value="8">
+      8-10
+    </label>
+    <label class="checkbox-inline" for="input_saturday-1">
+      <input type="checkbox" name="input_saturday" id="input_saturday-1" value="10">
+      10-12
+    </label>
+    <label class="checkbox-inline" for="input_saturday-2">
+      <input type="checkbox" name="input_saturday" id="input_saturday-2" value="12">
+      12-14
+    </label>
+    <label class="checkbox-inline" for="input_saturday-3">
+      <input type="checkbox" name="input_saturday" id="input_saturday-3" value="14">
+      14-16
+    </label>
+    <label class="checkbox-inline" for="input_saturday-4">
+      <input type="checkbox" name="input_saturday" id="input_saturday-4" value="16">
+      16-18
+    </label>
+  </div>
+</div>
+
+<!-- Multiple Checkboxes (inline) -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_sunday"><%= i18n("Sunday (select suitable times)") %></label>
+  <div class="col-md-4">
+    <label class="checkbox-inline" for="input_sunday-0">
+      <input type="checkbox" name="input_sunday" id="input_sunday-0" value="8">
+      8-10
+    </label>
+    <label class="checkbox-inline" for="input_sunday-1">
+      <input type="checkbox" name="input_sunday" id="input_sunday-1" value="10">
+      10-12
+    </label>
+    <label class="checkbox-inline" for="input_sunday-2">
+      <input type="checkbox" name="input_sunday" id="input_sunday-2" value="12">
+      12-14
+    </label>
+    <label class="checkbox-inline" for="input_sunday-3">
+      <input type="checkbox" name="input_sunday" id="input_sunday-3" value="14">
+      14-16
+    </label>
+    <label class="checkbox-inline" for="input_sunday-4">
+      <input type="checkbox" name="input_sunday" id="input_sunday-4" value="16">
+      16-18
+    </label>
+  </div>
+</div>
+
+<!-- Text input-->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="input_valid"><%= i18n("My answers are valid until") %></label>  
+  <div class="col-md-4">
+  <input id="input_valid" name="input_valid" type="date" class="form-control input-md" required="">
+    
+  </div>
+</div>
+<div class="form-group">
+  <div class="col-md-4"></div>  
+  <div class="col-md-4">
+  <button id="input_submit" name="input_submit" value="submit" class="btn btn-primary"><%= i18n('Submit') %></button>    
+  </div>
 
 </div>
 
-<script>
-// Attach a submit handler to the form
-$( "#invite_user_form" ).submit(function( event ) {
- 
-  // Stop form from submitting normally
-  event.preventDefault();
- 
-  // Get some values from elements on the page:
-  var $form = $( this ),
-    input_name = $form.find( "#input_name" ).val(),
-    input_stand_id = $form.find( "#input_stand_id" ).val(),
-    input_email = $form.find( "#input_email" ).val(),
-    input_message = $form.find( "#input_message" ).val().replace(new RegExp('\n','g'), '<br />');
-    url = $form.attr( "action" );
- 
-  // Send the data using post
-	var posting = $.post( url, 
-		{ 
-			input_name: input_name,
-			input_stand_id: input_stand_id,
-			input_email: input_email,
-			input_message: input_message
-		} 
-	).done(function(data) {
-    console.log(data);
-    var content = data.msg;
-    var box = bootbox.alert(content);
-    setTimeout(function() {
-    	box.modal('hide');
-    	$( "#invite_user_form" ).find( "#input_email" ).val('');
-		}, 1500);
-  }).fail(function(err) {
-    var box = bootbox.alert("ERROR: " + err);
-  });
-});
-</script>
+</fieldset>
+</form>
+
+</div>

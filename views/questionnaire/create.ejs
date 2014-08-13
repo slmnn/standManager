@@ -1,1 +1,101 @@
-<!-- create.ejs -->
+<%- partial('../partials/header') %>
+
+<div class="container">
+	<form id="questionnaire_form" action="create" method="post" role="form" class="form-horizontal" >
+		<fieldset>
+
+			<legend><%= i18n('Send new stand invitation') %></legend>
+			<div class="form-group">
+			  <label class="control-label" for="input_name"><%= i18n('Inviter name') %> (<%= i18n('required') %>)</label>
+			    <input id="input_name" name="input_name" type="text" readonly value="<%= user.firstname + ' ' + user.lastname %>" class="form-control">
+			</div>
+
+	    <div class="form-group">
+	      <label class="control-label" for="input_stand_id"><%= i18n('Stand') %> (<%= i18n('required') %>)</label>
+	        <select id="input_stand_id" name="input_stand_id" class="form-control">
+	          <% _.each(stands, function (s) { %>
+	            <option value="<%= s.id %>"><%= s.name %></option>
+	          <% }) %>            
+	        </select>
+
+	    </div>
+
+			<div class="form-group form-inline">
+			  <label class="control-label" for="input_email"><%= i18n('User email') %> (<%= i18n('required') %>)</label>
+			  <div class="form-inline">
+	        <select id="input_user" name="input_user" class="form-control">
+	          <% _.each(stand_users, function (u) { %>
+	            <option value="<%= u.email %>"><%= u.firstname %> <%= u.lastname %></option>
+	          <% }) %>
+	        </select>		
+			    <input id="input_email" name="input_email" type="email" placeholder="john.doe@example.com" class="form-control">	
+      	</div>
+	    </div>
+
+			<div class="form-group">
+			  <label class="control-label" for="input_title"><%= i18n('Subject') %> (<%= i18n('required') %>)</label>
+			    <input id="input_title" name="input_title" type="text" value="<%= i18n('Questionnaire for') %> <%= stands[0].name %> <%= i18n('participant') %>" class="form-control">
+			  <label class="control-label" for="input_message"><%= i18n('Message') %> (<%= i18n('required') %>)</label>
+			    ​<textarea id="input_message" name="input_message" rows="10" class="form-control">
+Hi,
+
+In order to serve you better I would like you to fill a questionnaire form. Follow the link below to fill the questionnaire:
+
+  _questionnairelink 
+
+BR,
+_myfullname
+			  	</textarea>
+			</div>
+
+			<div class="form-group">
+			    <button id="input_submit" name="input_submit" class="btn btn-primary pull-right"><%= i18n('Send') %></button>
+			</div>
+
+		</fieldset>
+	</form>
+
+</div>
+
+<script>
+$("#input_user").change(function(event) {
+	$( "#questionnaire_form" ).find( "#input_email" ).val($( "#questionnaire_form" ).find( "#input_user" ).val());
+});
+
+// Attach a submit handler to the form
+$( "#questionnaire_form" ).submit(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+ 
+  // Get some values from elements on the page:
+  var $form = $( this ),
+    input_name = $form.find( "#input_name" ).val(),
+    input_stand_id = $form.find( "#input_stand_id" ).val(),
+    input_email = $form.find( "#input_email" ).val(),
+    input_title = $form.find( "#input_title" ).val(),
+    input_message = $form.find( "#input_message" ).val().replace(new RegExp('\n','g'), '<br />');
+    url = $form.attr( "action" );
+ 
+  // Send the data using post
+	var posting = $.post( url, 
+		{ 
+			input_name: input_name,
+			input_stand_id: input_stand_id,
+			input_title: input_title,
+			input_email: input_email,
+			input_message: input_message
+		} 
+	).done(function(data) {
+    console.log(data);
+    var content = data.msg;
+    var box = bootbox.alert(content);
+    setTimeout(function() {
+    	box.modal('hide');
+    	$( "#questionnaire_form" ).find( "#input_email" ).val('');
+		}, 1500);
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err);
+  });
+});
+</script>

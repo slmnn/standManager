@@ -14,9 +14,6 @@ module.exports = {
   	created_by_name: {
   		type:'string'
   	},
-  	sent_to_id: {
-  		type:'string'
-  	},
   	title: {
   		type: 'string'
   	},

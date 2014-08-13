@@ -15,6 +15,9 @@ module.exports = {
   	allDay: {
   		type: 'boolean'
   	},
+    origin_questionnaire: {
+      type: 'boolean'
+    },
   	start: {
   		type: 'datetime',
   		required: true
