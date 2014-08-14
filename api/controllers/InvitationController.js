@@ -92,7 +92,6 @@ module.exports = {
 			var now = new Date();
 			var one_week = 7*24*60*60*1000;
 			var one_week_later = new Date(now.getTime() + one_week);
-			console.log("INVITATION",JSON.stringify(req.body));
 			var new_invitation = {
 				created_by: req.user[0].id + "",
 				created_by_name: req.body.input_name,
@@ -104,10 +103,14 @@ module.exports = {
 				expires: one_week_later
 			}
 			var password = "";
+			var new_user_was_created = false;
+			var old_users = [];
 			User.find({email:req.body.input_email}).exec(function(err, users){
 				if(err) return res.send("ERROR" + err);
 				if(users.length > 0) {
 					// The user is already in the system. We will not create a new one.
+					old_users = users;
+					console.log("OLD USERS: ", old_users);
 					var createNewUser = function(cb){ cb(); };
 				} else {
 					var createNewUser = function(cb){
@@ -127,7 +130,7 @@ module.exports = {
 						).exec(function(err, new_user){
 							console.log(err, new_user);
 							if(err) return cb({msg:'Creating new user failed! ' + err});
-							console.log("New user created!!")
+							new_user_was_created = true;
 							return cb();
 						})
 					};
@@ -145,16 +148,25 @@ module.exports = {
 					    }
 						});
 						// setup e-mail data with unicode symbols
-						console.log(JSON.stringify(i));
+						console.log("INVITATION", JSON.stringify(i));
 						var link = 'http://' + req.headers.host + '/invitation/find/' + i.id;
 						var signup_link = 'http://' + req.headers.host + '/user/create';
 						var login_link = 'http://' + req.headers.host + '/login';
 						var html_message_with_link = i.message.replace("_invitationlink", '<a href="'+link+'">' + link + '</a>');
-						html_message_with_link = html_message_with_link.replace("_myfullname", req.body.input_name);
-						html_message_with_link = html_message_with_link.replace("_username", req.body.input_email);
-						html_message_with_link = html_message_with_link.replace("_password", password);
+						html_message_with_link = html_message_with_link.replace("_myfullname", req.body.input_name);						
 						html_message_with_link = html_message_with_link.replace("_loginlink", '<a href="'+login_link+'">' + login_link + '</a>');
 						html_message_with_link = html_message_with_link.replace("_signuplink", '<a href="'+signup_link+'">' + signup_link + '</a>');
+						if(new_user_was_created) {
+							html_message_with_link = html_message_with_link.replace("_username", req.body.input_email);
+							html_message_with_link = html_message_with_link.replace("_password", password);
+						} else {
+							var usernames = [];
+							for(var j = 0; j < old_users.length; j++) {
+								usernames.push(old_users[j].username);
+							}
+							html_message_with_link = html_message_with_link.replace("_username", usernames.toString());
+							html_message_with_link = html_message_with_link.replace("_password", "[omitted]");
+						}
 						var mailOptions = {
 					    from: i.created_by_name, // sender address
 					    to: i.email, // list of receivers
@@ -162,6 +174,7 @@ module.exports = {
 					    text: 'Sorry, this message is in HTML.', // plaintext body
 					    html: html_message_with_link  // html body
 						};
+						console.log(mailOptions);
 						// send mail with defined transport object
 						transporter.sendMail(mailOptions, function(error, info){
 							transporter.close();

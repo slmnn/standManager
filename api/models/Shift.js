@@ -26,6 +26,9 @@ module.exports = {
     assigned_to_name: {
       type: 'string'
     },
+    assigned: {
+      type: 'boolean'
+    },
     accepted: {
       type: 'boolean'
     },

@@ -32,6 +32,30 @@ module.exports = {
 			});	
 		}
 	},
+	invitations : function(req, res) {
+		if(req.method == 'GET') {
+			if(req.params.id == null) res.view({msg:"Stand ID is missing", invitations: [], stand: {}});
+			Stand.findOne(req.params.id).where({owner_id:req.user[0].id}).exec(function(err, s){
+				if(err || s == null) res.view({msg:"You are not owner of this stand.", invitations: [], stand: {}});
+				Invitation.find({stand_id:s.id}).exec(function(err, invitations){
+					if(err) res.view({msg:"ERROR " + err, invitations: [], stand: {}});
+					res.view({msg:"We found " + invitations.length + " invitations!", invitations: invitations, stand: s});
+				})
+			})
+		}
+	},
+	questionnaires : function(req, res) {
+		if(req.method == 'GET') {
+			if(req.params.id == null) res.view({msg:"Stand ID is missing", questionnaires: [], stand: {}});
+			Stand.findOne(req.params.id).where({owner_id:req.user[0].id}).exec(function(err, s){
+				if(err || s == null) res.view({msg:"You are not owner of this stand.", questionnaires: [], stand: {}});
+				Questionnaire.find({stand_id:s.id}).exec(function(err, questionnaires){
+					if(err) res.view({msg:"ERROR " + err, questionnaires: [], stand: {}});
+					res.view({msg:"We found " + questionnaires.length + " questionnaires!", questionnaires: questionnaires, stand: s});
+				})
+			})
+		}
+	},
 	find: function(req, res) {
 		if(req.method == 'GET') {
 			var stand; 
@@ -128,6 +152,7 @@ module.exports = {
 				async.forEach(all_users, function(user, cb) {
 					Shift.find({assigned_to_id:user.id})
 					.where({accepted: true})
+					.where({assigned: true})
 					.where({ start: { '<=': end }})
 					.where({ end: { '>=': start }})
 					.exec(function(err, s){

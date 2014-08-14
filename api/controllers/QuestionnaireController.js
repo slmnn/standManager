@@ -62,8 +62,13 @@ module.exports = {
 				query.email = questionnaire.email;
 				if(questionnaire.user_id) query.id = questionnaire.user_id;
 				User.findOne(query).exec(function(err, u) {
-					if(err || u==null) return res.send("ERROR" + err, 500);
+					if(err || u==null) return cb("ERROR: No such user! " + err);
 					user = u;
+					// TODO: check that active questionnaire is available for this user!!!
+					if(u.active_questionnaries.indexOf(questionnaire.id + '') < 0) {
+						console.log(u.active_questionnaries, questionnaire.id + '');
+						cb("ERROR: This questionnaire is not available for this user!");
+					}
 					User.update(
 					{id:u.id}, 
 					{
@@ -71,14 +76,20 @@ module.exports = {
 						tel  : req.body.input_tel ? req.body.input_tel : ''
 					},
 						function(err, new_u) {
-							if(err || new_u==null) return res.send("ERROR" + err, 500);
+							if(err || new_u==null) return cb("ERROR: user update failed! " + err);
 							user = new_u[0];
 							console.log(user);
 							return cb(err);
 						})
 				});
 			};
-			async.series([findQuestionnaire, findUser], function(err){
+			var updateQuestionnaire = function(cb) {
+				Questionnaire.update({id:questionnaire.id},{filled:true, expires:expires}, function(err, new_q){
+					if(err) return cb(err);
+					return cb();
+				})
+			};
+			async.series([findQuestionnaire, findUser, updateQuestionnaire], function(err){
 				var reservation_table = [[],[],[],[],[],[],[]];
 				if(err) return res.send("ERROR" + err, 500);
 				for(var weekday = 0; weekday < week_available.length; weekday++) {
@@ -135,6 +146,9 @@ module.exports = {
 						if(i.user_id) query.id = i.user_id;
 						User.findOne(query).exec(function(err, u){
 							if(err) return res.send("ERROR" + err, 500);
+							if(u.active_questionnaries.indexOf(i.id + '') < 0) {
+								return res.send("Mismatching user id!", 403);
+							}
 							return res.view({questionnaire:i, stand: s, user: u});	
 						});	
 					} else {
@@ -210,6 +224,7 @@ module.exports = {
 				// setup e-mail data with unicode symbols
 				console.log(JSON.stringify(i));
 				var link = 'http://' + req.headers.host + '/questionnaire/find/' + i.id + '?email=' + i.email + '&user_id=' + i.user_id;
+				link = link.replace('+','%2B');
 				var login_link = 'http://' + req.headers.host + '/login';
 				var html_message_with_link = i.message.replace("_questionnairelink", '<a href="'+link+'">' + link + '</a>');
 				html_message_with_link = html_message_with_link.replace("_myfullname", req.body.input_name);
@@ -235,7 +250,8 @@ module.exports = {
 			    		// TODO: Create new user account and send invitation link
 			    		if(u == null) return res.json({msg:'New user account was created and questionnaire was sent.'})
 				    	if(typeof u.active_questionnaries == 'undefined') u.active_questionnaries = [];
-				    	User.update({id:i.user_id},{active_questionnaries:u.active_questionnaries.push(i.id)}, function(err, new_u){
+				    	u.active_questionnaries.push(i.id + '');
+				    	User.update({id:i.user_id},{active_questionnaries:u.active_questionnaries}, function(err, new_u){
 				    		return res.json({msg:'Questionnaire sent to ' + mailOptions.to + '!'});
 				    	});
 			    	});

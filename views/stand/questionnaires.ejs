@@ -1,0 +1,37 @@
+<%- partial('../partials/header')%>
+
+<div class="container">
+  <div class="page-header"><h2><%= i18n('Questionnaires') %> <small><%= stand.name %></small></h2></div>
+
+  <% if(stand.id != null) { %>
+<div class="panel panel-default">
+  <div class="panel-body">
+  	<a href="/questionnaire/create/<%= stand.id %>" class="btn btn-primary"><%= i18n('Create new questionnaires') %></a>
+  </div>
+</div>
+  <% } %>
+
+  <% if(questionnaires.length == 0) { %>
+  	<p><%= i18n('You have not sent any questionnaires yet!') %></p>
+  <% } else { %>
+  	<p><%= i18n(msg) %></p>
+  	<table class="table">
+  		<tr>
+  			<th><%= i18n('Updated') %></th>
+  			<th><%= i18n('Invitee email') %></th>
+  			<th><%= i18n('Answered') %></th>
+  			<th><%= i18n('Expires') %></th>
+  		</tr>
+  		<% _.each(questionnaires, function(i) { %>
+  			<tr>
+  				<td><%= new Date(i.updatedAt).toDateString() %></td>
+  				<td><%= i.email %></td>
+  				<td class="<%= (i.filled ? 'success' : 'warning') %>"><%= (i.filled ? 'Yes' : 'No') %></td>
+          <% var expires = new Date(i.expires); var now = new Date(); %>
+  				<td class="<%= (now.getTime() < expires.getTime() ? 'success' : 'danger') %>"><%= expires.toDateString() %></td>
+  			</tr>
+  		<% }) %>
+  	</table>
+
+  <% } %>
+</div>

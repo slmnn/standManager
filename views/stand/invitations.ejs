@@ -1,0 +1,36 @@
+<%- partial('../partials/header')%>
+
+<div class="container">
+  <div class="page-header"><h2><%= i18n('Invitations') %> <small><%= stand.name %></small></h2></div>
+
+  <% if(stand.id != null) { %>
+<div class="panel panel-default">
+  <div class="panel-body">
+  	<a href="/invitation/create/<%= stand.id %>" class="btn btn-primary"><%= i18n('Create new invitations') %></a>
+  </div>
+</div>
+  <% } %>
+
+  <% if(invitations.length == 0) { %>
+  	<p><%= i18n('You have not sent any invitations yet!') %></p>
+  <% } else { %>
+  	<p><%= i18n(msg) %></p>
+  	<table class="table">
+  		<tr>
+  			<th><%= i18n('Date') %></th>
+  			<th><%= i18n('Invitee email') %></th>
+  			<th><%= i18n('Acc. / Decl.') %></th>
+  			<th><%= i18n('Expires') %></th>
+  		</tr>
+  		<% _.each(invitations, function(i) { %>
+  			<tr>
+  				<td><%= new Date(i.createdAt).toDateString() %></td>
+  				<td><%= i.email %></td>
+  				<td><%= (i.accepted ? 'Accepted' : (i.declined ? 'Declined' : 'No answer')) %></td>
+  				<td><%= new Date(i.expires).toDateString() %></td>
+  			</tr>
+  		<% }) %>
+  	</table>
+
+  <% } %>
+</div>
