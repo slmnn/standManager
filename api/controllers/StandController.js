@@ -60,12 +60,24 @@ module.exports = {
 		if(req.method == 'GET') {
 			var stand; 
 			var users = [];
+			var unsent_email_count = 0;
 			var findStand = function(cb) {
 				Stand.findOne(req.params.id).exec(function(err, s){
 					if(err) cb(err);
 					stand = s;
 					cb(err, s);
 				});				
+			};
+			var unsentEmailCount = function(cb) {
+				Shift.find({stand_id:req.params.id})
+				.where({email_sent:false})
+				.where({accepted:false})
+				.where({assigned:true})
+				.exec(function(err, c){
+					if(err) return cb(err);
+					unsent_email_count = c.length;
+					return cb();
+				});
 			};
 			var findUsers = function(cb) {
 				User.find().exec(function(err, u_all){
@@ -85,10 +97,11 @@ module.exports = {
 				if(err) res.send(err, 500);
 				return res.view({
 					stand: stand,
+					unsent_email_count: unsent_email_count,
 					users: users
 				});				
 			}
-			async.parallel([findUsers, findStand], renderView);
+			async.parallel([findUsers, findStand, unsentEmailCount], renderView);
 		}
 	},
 	findUsersForShift: function(req, res) {

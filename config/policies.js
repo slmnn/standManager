@@ -23,6 +23,9 @@ module.exports.policies = {
   UserController: {
     "create": false
   },
+  ShiftController: {
+    "response": true
+  },
   InvitationController: {
     "find": true,
     "accept": true

@@ -7,6 +7,12 @@
   
 	<div id='calendar' class="calendar"></div>
 
+	<div id="unsent_email_count">
+		<span class="badge"><%= unsent_email_count %></span> <%= i18n("unsent assignment emails") %>
+		<button style="margin-top: 5px" url="/shift/sendEmails/<%= stand.id %>" class="btn btn-success pull-right" id="send_assignments_emails"><%= i18n('Send assignment emails now') %></button>
+	</div>
+
+	
 </div>
 
 <!-- Modal -->
@@ -49,6 +55,25 @@ var stand_name = "<%= stand.name %>";
 var last_calendar_event_clicked = {};
 
 $(document).ready(function() {
+
+$( "#send_assignments_emails" ).click(function( event ) {
+  // Stop form from submitting normally
+  event.preventDefault();
+
+  // Send the data using delete
+  $.get('/shift/sendEmails/' + stand_id)
+  .done(function(result) {
+    var box = bootbox.alert("Assignment emails sent!");
+		setTimeout(function() {
+    	box.modal('hide');
+    	$('#calendar').fullCalendar( 'refetchEvents' );
+		}, 1500);  	
+  })
+  .fail(function(err) {
+    var box = bootbox.alert("Sending emails failed!");
+  });
+});
+
 
 $( "#delete_shift_button" ).click(function( event ) {
   // Stop form from submitting normally

@@ -35,6 +35,18 @@ module.exports = {
 			})
 		}
 	},
+	unsentEmailCount : function(req, res) {
+		if(req.method == 'GET') {
+			Shift.find({stand_id:req.params.id})
+			.where({email_sent:false})
+			.where({accepted:false})
+			.where({assigned:true})
+			.exec(function(err, c){
+				if(err) return res.json({msg:err});
+				return res.json({unsentEmailCount:c.length});
+			});
+		}
+	},
 	sendEmails : function(req, res) {
 		var shifts = [];
 		var user = {};
@@ -61,7 +73,7 @@ module.exports = {
 			async.forEach(shifts, function(shift, cb) {
 				// Finding other users on the same shift
 				console.log(shift.start);
-				Shift.find({stand_id:req.params.id})
+				Shift.find({stand_id:req.params.id+''})
 				.where({ start : shift.start })
 				.where({ end : shift.end })
 				.exec(function(err, other_shifts) {
@@ -118,9 +130,9 @@ module.exports = {
 							// send mail with defined transport object
 							transporter.sendMail(mailOptions, function(error, info){
 						    if(error){
-						      cb({msg:'Sending shift assignment failed! ERROR: ' + error});	
+						      cb('Sending shift assignment failed! ERROR: ' + error);	
 						    }else{
-						      cb({msg:'Shift assignment sent to ' + mailOptions.to + '!'});
+						      cb('Shift assignment sent to ' + mailOptions.to + '!');
 						    }
 							});							
 						});
