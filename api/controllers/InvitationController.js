@@ -11,6 +11,47 @@ var needle = require("needle");
 var randomstring = require("just.randomstring");
 
 module.exports = {
+	response: function(req, res) {
+		if(req.method == 'GET') {
+			Invitation.findOne(req.params.id)
+			.where({accepted:false})
+			.where({declined:false})
+			.exec(function(err, i){
+				if(err) return res.send("ERROR (invalid invitation)" + err, 500);
+				if(i==null) return res.view({msg:"ERROR: Invitation is no longer available!"}, 200);
+				if(req.query.answer == "decline") {
+					i.declined = true;
+					i.save(function(err, new_i) {
+						return res.view({msg:"You have declined the invitation!"}, 200);
+					})
+				} else {
+					var now = new Date();
+					var expires = new Date(i.expires);
+					if(expires.getTime() > now.getTime()) {
+						i.accepted = true;
+						i.save(function(err, i) {
+							if(err) return res.send("ERROR " + err, 500);
+							console.log("ACCEPTING: ", req.query);
+							User.findOne(req.query.user_id).exec(function(err, u) {
+								if(!u || err) return res.send("ERROR (invalid user) " + err, 500);
+								if(u.stands.indexOf(i.stand_id) != -1) {
+									return res.view({msg:"ERROR: You are already member of this stand!"});
+								}
+								u.stands.push(i.stand_id + "");
+								User.update({id:u.id},{stands:u.stands}, function(err, new_u) {
+									return res.view({msg:"You have accepted the invitation!"});
+								})
+							})
+						})
+					} else {
+						return res.view({msg:"ERROR: Invitation is expired!"}, 200);
+					}
+				}
+			})
+		} else {
+			return res.send("Only GET", 404);
+		}
+	},
 	accept: function(req, res) {
 		if(req.method == 'POST') {
 			console.log(JSON.stringify(req.body));
@@ -32,7 +73,7 @@ module.exports = {
 						i.accepted = true;
 						i.save(function(err, i) {
 							if(err) return res.send("ERROR " + err, 500);
-							User.findOne(req.user[0].id).exec(function(err, u) {
+							User.findOne(req.params.user_id).exec(function(err, u) {
 								if(!u || err) return res.send("ERROR " + err, 500);
 								if(u.stands.indexOf(i.stand_id) != -1) {
 									return res.json({msg:"ERROR: You are already member of this stand!"});
@@ -85,7 +126,7 @@ module.exports = {
 			}
 			async.parallel([findUser, findStands], function(err) {
 				if(err) return res.send(err, 500);
-				return res.view({stands: owned_stands, user: user})
+				return res.view({stands: owned_stands, user: user, message: sails.config.invitation_email})
 			})
 		}
 		else if(req.method == 'POST') {
@@ -105,11 +146,13 @@ module.exports = {
 			var password = "";
 			var new_user_was_created = false;
 			var old_users = [];
+			var user = {}
 			User.find({email:req.body.input_email}).exec(function(err, users){
 				if(err) return res.send("ERROR" + err);
 				if(users.length > 0) {
 					// The user is already in the system. We will not create a new one.
 					old_users = users;
+					user = old_users[0];
 					console.log("OLD USERS: ", old_users);
 					var createNewUser = function(cb){ cb(); };
 				} else {
@@ -131,6 +174,7 @@ module.exports = {
 							console.log(err, new_user);
 							if(err) return cb({msg:'Creating new user failed! ' + err});
 							new_user_was_created = true;
+							user = new_user;
 							return cb();
 						})
 					};
@@ -148,42 +192,58 @@ module.exports = {
 					    }
 						});
 						// setup e-mail data with unicode symbols
-						console.log("INVITATION", JSON.stringify(i));
-						var link = 'http://' + req.headers.host + '/invitation/find/' + i.id;
-						var signup_link = 'http://' + req.headers.host + '/user/create';
-						var login_link = 'http://' + req.headers.host + '/login';
-						var html_message_with_link = i.message.replace("_invitationlink", '<a href="'+link+'">' + link + '</a>');
-						html_message_with_link = html_message_with_link.replace("_myfullname", req.body.input_name);						
-						html_message_with_link = html_message_with_link.replace("_loginlink", '<a href="'+login_link+'">' + login_link + '</a>');
-						html_message_with_link = html_message_with_link.replace("_signuplink", '<a href="'+signup_link+'">' + signup_link + '</a>');
-						if(new_user_was_created) {
-							html_message_with_link = html_message_with_link.replace("_username", req.body.input_email);
-							html_message_with_link = html_message_with_link.replace("_password", password);
-						} else {
-							var usernames = [];
-							for(var j = 0; j < old_users.length; j++) {
-								usernames.push(old_users[j].username);
+						Stand.findOne(i.stand_id).exec(function(err, stand) {
+							if(err) cb({msg:'Stand findOne failed! ERROR: ' + err});
+
+							var link = 'http://' + req.headers.host + '/invitation/find/' + i.id;
+							var signup_link = 'http://' + req.headers.host + '/user/create';
+							var login_link = 'http://' + req.headers.host + '/login';
+							var html_message_with_link = i.message.replace("_invitationlink", '<a href="'+link+'">' + link + '</a>');
+
+							html_message_with_link = html_message_with_link.replace("_myfullname", req.body.input_name);
+							html_message_with_link = html_message_with_link.replace("_receivername", user.firstname);
+							html_message_with_link = html_message_with_link.replace("_standname", stand.name);
+							html_message_with_link = html_message_with_link.replace("_standdescription", stand.description);
+							html_message_with_link = html_message_with_link.replace("_standlocation", stand.location);
+							var maplink = "http://maps.google.com/maps?q="+stand.lat+","+stand.lng+"&ll="+stand.lat+","+stand.lng+"&z=14"
+							html_message_with_link = html_message_with_link.replace("_maplink", maplink);
+							html_message_with_link = html_message_with_link.replace("_loginlink", login_link);
+							html_message_with_link = html_message_with_link.replace("_loginlink", login_link);
+							var yeslink = 'http://' + req.headers.host + '/invitation/response/' + i.id + '?user_id=' + user.id + '&answer=accept';
+							var nolink = 'http://' + req.headers.host + '/invitation/response/' + i.id + '?user_id=' + user.id + '&answer=decline';
+							html_message_with_link = html_message_with_link.replace("_yesurl", yeslink);
+							html_message_with_link = html_message_with_link.replace("_nourl", nolink);
+							if(new_user_was_created) {
+								html_message_with_link = html_message_with_link.replace("_username", req.body.input_email);
+								html_message_with_link = html_message_with_link.replace("_password", password);
+							} else {
+								var usernames = [];
+								for(var j = 0; j < old_users.length; j++) {
+									usernames.push(old_users[j].username);
+								}
+								html_message_with_link = html_message_with_link.replace("_username", usernames.toString());
+								html_message_with_link = html_message_with_link.replace("_password", "[omitted]");
 							}
-							html_message_with_link = html_message_with_link.replace("_username", usernames.toString());
-							html_message_with_link = html_message_with_link.replace("_password", "[omitted]");
-						}
-						var mailOptions = {
-					    from: i.created_by_name, // sender address
-					    to: i.email, // list of receivers
-					    subject: 'Invitation to a stand', // Subject line
-					    text: 'Sorry, this message is in HTML.', // plaintext body
-					    html: html_message_with_link  // html body
-						};
-						console.log(mailOptions);
-						// send mail with defined transport object
-						transporter.sendMail(mailOptions, function(error, info){
-							transporter.close();
-					    if(error){
-					      cb({msg:'Sending invitation failed! ERROR: ' + error});	
-					    }else{
-					      cb({msg:'Invitation sent to ' + mailOptions.to + '!'});
-					    }
-						});
+
+							var mailOptions = {
+						    from: i.created_by_name, // sender address
+						    to: i.email, // list of receivers
+						    subject: sails.config.invitation_email_subject.replace("_standname", stand.name), // Subject line
+						    text: 'Sorry, this message is in HTML.', // plaintext body
+						    html: html_message_with_link  // html body
+							};
+
+							console.log(mailOptions);
+							// send mail with defined transport object
+							transporter.sendMail(mailOptions, function(error, info){
+								transporter.close();
+						    if(error){
+						      cb({msg:'Sending invitation failed! ERROR: ' + error});	
+						    }else{
+						      cb({msg:'Invitation sent to ' + mailOptions.to + '!'});
+						    }
+							});							
+						})
 					});	
 				};
 				async.series([createNewUser, createAndSendInvitation], function(err){

@@ -28,6 +28,7 @@ module.exports.policies = {
   },
   InvitationController: {
     "find": true,
+    "response": true,
     "accept": true
   },
   QuestionnaireController: {
