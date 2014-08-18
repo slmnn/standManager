@@ -1,3 +1,8 @@
 <div class="container">
+	<% if(answer_was_yes) { %>
+		<p><%= i18n(Your answer is now saved, welcome to the shift! You can use the link below to check the current status of your shift.) %></p>
+	<% } else { %>
+		<p><%= i18n(Your answer is now saved! Stay tuned for new shift opportunities.) %></p>
+	<% } %>
 <p><%= msg %></p>
 </div>

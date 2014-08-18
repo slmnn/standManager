@@ -114,6 +114,7 @@ $(document).ready(function() {
     },
     height: 800,
     defaultView: 'agendaWeek',
+    lang: (window.navigator.userLanguage || window.navigator.language),
     firstDay: 1, // monday
     minTime: '07:00:00', // Could be determined in the backend
     maxTime: '20:00:00', // Could be determined in the backend

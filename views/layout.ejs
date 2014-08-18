@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><% var title = typeof page_title != 'undefined' ? page_title : "Stand Manager" %><%= title %></title>
+    <title><% var title = typeof page_title != 'undefined' ? page_title : "Stand Manager" %><%= i18n(title) %></title>
 
     <!-- Viewport mobile tag for sensible mobile support -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -109,6 +109,7 @@
     <script src="/js/app.js"></script>
     <script src="/js/bootstrap-clockpicker.js"></script>
     <script src="/js/fullcalendar.js"></script>
+    <script src="/js/lang-all.js"></script>
     <script src="/js/map/create_new_map.js"></script>
     <script src="/js/modal.js"></script>
     <script src="/js/sails.io.js"></script>

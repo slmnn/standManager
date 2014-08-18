@@ -2,18 +2,19 @@
 
 <div class="container">
 	<div class="page-header">
-    <h2><%= stand.name %><br/><small><%= stand.description %></small></h2>
+    <h2><%= stand.name %> <small><%= stand.description %></small></h2>
   </div>
-  
-	<div id='calendar' class="calendar"></div>
 
-	<div id="unsent_email_count">
-		<span class="badge"><%= unsent_email_count %></span> <%= i18n("unsent assignment emails") %>
-		<button style="margin-top: 5px" url="/shift/sendEmails/<%= stand.id %>" class="btn btn-success pull-right" id="send_assignments_emails"><%= i18n('Send assignment emails now') %></button>
-	</div>
-
-	
+<div class="alert alert-info" role="alert" id="unsent_email_count" style="display: none;">
+<h4><%= i18n('You have unsent assignment emails') %></h4>
+<span class="badge" id="unsent_email_count_badge"><%= unsent_email_count %></span> <%= i18n("assignment emails are ready to be sent.") %>
+<div class="clearfix">
+	<button style="margin-top: 5px" url="/shift/sendEmails/<%= stand.id %>" class="btn btn-xs btn-primary pull-right" id="send_assignments_emails_btn"><%= i18n('Send assignments') %></button>
 </div>
+</div>
+
+
+	<div id='calendar' class="calendar"></div>
 
 <!-- Modal --> 
 <div class="modal fade" id="assign_shift_modal" tabindex="-1" role="dialog" aria-labelledby="assign_shift_modal_label" aria-hidden="true">
@@ -56,7 +57,7 @@ var last_calendar_event_clicked = {};
 
 $(document).ready(function() {
 
-$( "#send_assignments_emails" ).click(function( event ) {
+$( "#send_assignments_emails_btn" ).click(function( event ) {
   // Stop form from submitting normally
   event.preventDefault();
 
@@ -178,9 +179,26 @@ $(document).ready(function() {
 		selectable: true,
 		selectHelper: true,
 		axisFormat: 'HH:mm',
+		lang: (window.navigator.userLanguage || window.navigator.language),
 		timeFormat: {
 		    agenda: 'H:mm',
 		    month: 'H:mm'
+		},
+		loading: function(isloading) {
+			if(!isloading) {
+				$.get("/stand/unsentEmailCount/" + stand_id)
+				.done(function(data){
+					if(data.unsent_email_count != null) {
+						$("#unsent_email_count_badge").text(data.unsent_email_count);
+						if(data.unsent_email_count > 0) {
+							$("#unsent_email_count").show(800);
+						}
+						else if(data.unsent_email_count == 0) {
+							$("#unsent_email_count").hide(500);
+						}
+					}
+				})
+			}
 		},
 		eventClick: function(calEvent, jsEvent, view) {
 			if(!calEvent.assigned) { 

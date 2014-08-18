@@ -32,6 +32,18 @@ module.exports = {
 			});	
 		}
 	},
+	unsentEmailCount : function(req, res) {
+		if(req.method == 'GET' && req.params.id != null) {
+			Shift.find({stand_id:req.params.id})
+			.where({email_sent:false})
+			.where({accepted:false})
+			.where({assigned:true})
+			.exec(function(err, c){
+				if(err) return res.send(err);
+				return res.json({unsent_email_count : c.length})
+			});
+		}
+	},
 	invitations : function(req, res) {
 		if(req.method == 'GET') {
 			if(req.params.id == null) res.view({msg:"Stand ID is missing", invitations: [], stand: {}});

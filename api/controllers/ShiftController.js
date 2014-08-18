@@ -30,7 +30,7 @@ module.exports = {
 				}
 				shift.save(function(err) {
 					if(err) return res.view({msg:'ERROR: Saving shift failed. ' + err});
-					return res.view({msg:'OK'});
+					return res.view({msg:'OK', answer_was_yes: shift.accepted});
 				})
 			})
 		}
