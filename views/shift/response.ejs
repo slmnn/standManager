@@ -1,8 +1,13 @@
 <div class="container">
-	<% if(answer_was_yes) { %>
-		<p><%= i18n(Your answer is now saved, welcome to the shift! You can use the link below to check the current status of your shift.) %></p>
+	<% if(msg.indexOf('ERROR') >= 0) { %>
+		<p><%= i18n('There was a mistake in the system. Perhaps you have already answered to this assignment. See error message below:') %>
+		<div class="alert alert-danger" role="alert"><%= msg %></div>
 	<% } else { %>
-		<p><%= i18n(Your answer is now saved! Stay tuned for new shift opportunities.) %></p>
+		<% if(req.query.answer == 'yes') { %>
+			<div class="alert alert-success" role="alert"><%= i18n('Your answer is now saved, welcome to the shift!') %></div>
+		<% } else { %>
+			<div class="alert alert-info" role="alert"><%= i18n('Your answer is now saved! Stay tuned for new shift opportunities.') %></div>
+		<% } %>
 	<% } %>
-<p><%= msg %></p>
+	<p><%= i18n('You can use the link below to check the current status of your shift.') %></p>
 </div>

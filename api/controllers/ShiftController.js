@@ -27,6 +27,7 @@ module.exports = {
 					shift.assigned_to_name = '';
 					shift.accepted = false;
 					shift.assigned = false;
+					shift.email_sent = false;
 				}
 				shift.save(function(err) {
 					if(err) return res.view({msg:'ERROR: Saving shift failed. ' + err});
@@ -73,7 +74,7 @@ module.exports = {
 			async.forEach(shifts, function(shift, cb) {
 				// Finding other users on the same shift
 				console.log(shift.start);
-				Shift.find({stand_id:req.params.id+''})
+				Shift.find({stand_id:req.params.id + ''})
 				.where({ start : shift.start })
 				.where({ end : shift.end })
 				.exec(function(err, other_shifts) {
@@ -132,7 +133,11 @@ module.exports = {
 						    if(error){
 						      cb('Sending shift assignment failed! ERROR: ' + error);	
 						    }else{
-						      cb('Shift assignment sent to ' + mailOptions.to + '!');
+						    	shift.email_sent = true;
+						    	shift.save(function(err, new_shift) {
+						    		if(err) cb(err);
+						    		cb('Shift assignment sent to ' + mailOptions.to + '!');
+						    	})
 						    }
 							});							
 						});

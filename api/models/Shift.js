@@ -26,6 +26,9 @@ module.exports = {
     assigned_to_name: {
       type: 'string'
     },
+    email_sent: {
+      type: 'boolean'
+    },
     assigned: {
       type: 'boolean'
     },
