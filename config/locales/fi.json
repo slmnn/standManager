@@ -4,6 +4,7 @@
   "Password"     : "Salasana",
   "Log in"       : "Kirjaudu sisään",
   "Send new stand invitation"       : "Lähetä kutsu uuteen kohteeseen",
+  "Turn all Google events into reservations"       : "Luo jokaista Google kalenterimerkintää vastaavat varaukset",
   "Inviter name"       : "Kutsujan nimi",
   "required"       : "vaaditaan",
   "Stand"       : "Kohde",
@@ -56,6 +57,7 @@
   "Set Coordinates"       : "Aseta kohteen koordinaatit",
   "Set"       : "Aseta",
   "Delete"       : "Poista",
+  "Close"       : "Sulje",
   "Unassign"       : "Pura vuoromääräys",
   "Send assignments"       : "Lähetä vuoromääräykset",
   "Remove user from my stand"       : "Poista henkilö kohteelta",
@@ -89,6 +91,7 @@
   "Select calendars"       : "Valitse kalenterit",
   "Select calendars"       : "Valitse kalenterit",
   "Accept"       : "Hyväksy",
+  "Assign"       : "Tee vuoromääräys",
   "Reject"       : "Hylkää",
   "Reject"       : "Hylkää"
   
