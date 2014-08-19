@@ -24,7 +24,7 @@ module.exports = {
 					i.save(function(err, new_i) {
 						User.findOne(req.query.user_id).exec(function(err, user) {
 							if(user.stands.length == 0) {
-								user.destroy(function(err) {
+								User.destroy({id:user.id},function(err) {
 									return res.view({msg:"You have declined the invitation, and your credentials are destroyed!"}, 200);
 								})
 							}
