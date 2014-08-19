@@ -1,10 +1,21 @@
 <%- partial('../partials/header') %>
 
 <div class="container">
+
+	<% var stand = undefined; if(stands.length > 0){ stand = stands[0]; } %>
+  <% if(stand.id != null) { %>
+  <ul class="nav nav-tabs" role="tablist">
+    <li><a href="/stand/users/<%= stand.id %>"><%= i18n('Personnel') %></a></li>
+    <li class="active"><a href="/stand/invitations/<%= stand.id %>"><%= i18n('Invitations') %></a></li>
+    <li><a href="/stand/questionnaires/<%= stand.id %>"><%= i18n('Questionnaires') %></a></li>
+    <li><a href="/stand/kickuser/<%= stand.id %>"><%= i18n('Remove participants') %></a></li>
+  </ul>
+  <div class="page-header"><h2><%= i18n('Create new invitations') %> <small><%= stand.name %></small></h2></div>
+  <% } %>
+
 	<form id="invite_user_form" action="create" method="post" role="form" class="form-horizontal" >
 		<fieldset>
 
-			<legend><%= i18n('Send new stand invitation') %></legend>
 			<div class="form-group">
 			  <label class="control-label" for="input_name"><%= i18n('Inviter name') %> (<%= i18n('required') %>)</label>
 			    <input id="input_name" name="input_name" type="text" readonly value="<%= user.firstname + ' ' + user.lastname %>" class="form-control">
