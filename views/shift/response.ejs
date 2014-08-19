@@ -16,6 +16,9 @@
 			<div class="alert alert-info" role="alert">
 				<h4><%= i18n('Shift declined :(') %></h4>
 				<%= i18n('Your answer is now saved! Stay tuned for new shift opportunities.') %></div>
+				<p><%= i18n('If you want, you can tell the reason via email to stand owner. Please use the link below to send the email.') %><br>
+				<% var start = new Date(shift.start) %>
+			  <a href="mailto:<%= created_by.email %>?subject=<%= i18n('Reason for declining') %> (<%= start.toLocaleString() %>)&body=<%= i18n('Hi, I declined the shift because of...') %>"><%= i18n('Send reason via email') %></a></p>
 		<% } %>
 	<% } %>
 

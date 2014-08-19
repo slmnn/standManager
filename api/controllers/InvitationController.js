@@ -22,7 +22,14 @@ module.exports = {
 				if(req.query.answer == "decline") {
 					i.declined = true;
 					i.save(function(err, new_i) {
-						return res.view({msg:"You have declined the invitation!"}, 200);
+						User.findOne(req.query.user_id).exec(function(err, user) {
+							if(user.stands.length == 0) {
+								user.destroy(function(err) {
+									return res.view({msg:"You have declined the invitation, and your credentials are destroyed!"}, 200);
+								})
+							}
+							return res.view({msg:"You have declined the invitation!"}, 200);
+						})
 					})
 				} else {
 					var now = new Date();

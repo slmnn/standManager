@@ -32,7 +32,9 @@ module.exports = {
 				}
 				shift.save(function(err) {
 					if(err) return res.view({msg:'ERROR: Saving shift failed. ' + err});
-					return res.view({msg:'OK', answer_was_yes: shift.accepted, shift:shift});
+					User.findOne(shift.created_by).exec(function(err, shift_creator) {
+						return res.view({msg:'OK', answer_was_yes: shift.accepted, shift:shift, created_by:shift_creator});
+					});
 				})
 			})
 		}
@@ -210,7 +212,7 @@ module.exports = {
 							var mailOptions = {
 						    from: shift.title, // sender address
 						    to: original_user.email, // list of receivers
-						    subject: 'Stand assignment', // Subject line
+						    subject: sails.config.shift_assignment_email_subject.replace('_shiftday', start.toLocaleDateString()), // Subject line
 						    text: 'Sorry, this message is in HTML.', // plaintext body
 						    html: html_message_with_link,  // html body
 						    alternatives: [{

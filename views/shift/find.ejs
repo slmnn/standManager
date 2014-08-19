@@ -1,36 +1,37 @@
 <div class="container">
-	<% if(err != null) { %>
-		<p><%= i18n('There was a mistake in the system. Perhaps you have already answered to this assignment. See error message below:') %>
+	<% if(err != null || shift == null || stand == null) { %>
+		<p><%= i18n('There was a mistake in the system. Perhaps you have declined this assignment. See error message below:') %>
 		<div class="alert alert-danger" role="alert"><%= err %></div>
+	<% } else { %>
+		<h2><%= i18n('Assignment') %> <small><%= stand.name %></small></h2>
+		<% var start = new Date(shift.start); var end = new Date(shift.end); %>
+		<h3><i class="fa fa-calendar"></i> <%= (start.toLocaleDateString() + ' ' + start.toLocaleTimeString() + '-' + end.toLocaleTimeString()) %></h3>
+		<dl class="dl-horizontal">
+		  <dt><%= i18n('Attendees') %></dt>
+		  <dd>
+		  	<ul>
+		  		<% _.each(attendees, function(a) { %>
+		  			<li>
+		  				<b><%= (a.name) %></b><br>
+		  				<i class="fa fa-envelope-o"></i> <%= (a.email) %><br>
+		  				<i class="fa fa-phone"></i> <%= a.tel %>
+		  			</li>
+		  		<% }) %>
+		  	</ul>
+		  </dd>
+		  <dt><%= i18n('Stand') %></dt>
+		  <dd><%= stand.description %></dd>
+		  <dt><%= i18n('Location') %></dt>
+		  <dd>
+		  	<img src="http://maps.googleapis.com/maps/api/staticmap?center=<%= stand.lat %>,<%= stand.lng %>&zoom=13&size=400x200&maptype=roadmap
+	&markers=<%= stand.lat %>,<%= stand.lng %>" /><br />
+	      <small><i class="fa fa-map-marker"></i> <i><%= stand.location %> (<a target="_blank" href="http://maps.google.com/maps?q=<%= stand.lat %>,<%= stand.lng %>&ll=<%= stand.lat %>,<%= stand.lng %>&z=14"><%= i18n('Show map') %></a>)</i></small>
+	    </dd>
+		</dl>
+		<p>
+			<% var link = 'http://' + req.headers.host + '/shift/find/' + shift.id + '?user_id=' + shift.assigned_to_id %>
+			<%= i18n('You can use the link below to check the current status of your shift.') %><br>
+			<a href="<%= link %>"><%= link %></a>
+		</p>
 	<% } %>
-	<h2><%= i18n('Assignment') %> <small><%= stand.name %></small></h2>
-	<% var start = new Date(shift.start); var end = new Date(shift.end); %>
-	<h3><i class="fa fa-calendar"></i> <%= (start.toLocaleDateString() + ' ' + start.toLocaleTimeString() + '-' + end.toLocaleTimeString()) %></h3>
-	<dl class="dl-horizontal">
-	  <dt><%= i18n('Attendees') %></dt>
-	  <dd>
-	  	<ul>
-	  		<% _.each(attendees, function(a) { %>
-	  			<li>
-	  				<b><%= (a.name) %></b><br>
-	  				<i class="fa fa-envelope-o"></i> <%= (a.email) %><br>
-	  				<i class="fa fa-phone"></i> <%= a.tel %>
-	  			</li>
-	  		<% }) %>
-	  	</ul>
-	  </dd>
-	  <dt><%= i18n('Stand') %></dt>
-	  <dd><%= stand.description %></dd>
-	  <dt><%= i18n('Location') %></dt>
-	  <dd>
-	  	<img src="http://maps.googleapis.com/maps/api/staticmap?center=<%= stand.lat %>,<%= stand.lng %>&zoom=13&size=400x200&maptype=roadmap
-&markers=<%= stand.lat %>,<%= stand.lng %>" /><br />
-      <small><i class="fa fa-map-marker"></i> <i><%= stand.location %> (<a target="_blank" href="http://maps.google.com/maps?q=<%= stand.lat %>,<%= stand.lng %>&ll=<%= stand.lat %>,<%= stand.lng %>&z=14"><%= i18n('Show map') %></a>)</i></small>
-    </dd>
-	</dl>
-	<p>
-		<% var link = 'http://' + req.headers.host + '/shift/find/' + shift.id + '?user_id=' + shift.assigned_to_id %>
-		<%= i18n('You can use the link below to check the current status of your shift.') %><br>
-		<a href="<%= link %>"><%= link %></a>
-	</p>
 </div>

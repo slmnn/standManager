@@ -42,7 +42,7 @@ module.exports = {
   invitation_email_subject: 'Kutsu esittelypisteen käyttäjäksi (_standname)',
   invitation_email: ' \
   Hei _receivername,<br><br>\
-  Haluamme kutsua sinut esittelypisteelle, jonka tiedot näkyvät alla: <br>\
+  Haluamme kutsua sinut kohteeseen, jonka tiedot näkyvät alla: <br>\
   <hr>\
   <p><b>_standname</b><br>\
   _standdescription<br>\

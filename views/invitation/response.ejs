@@ -1,3 +1,22 @@
 <div class="container">
-<p><%= msg %></p>
+	<% if(msg.indexOf('ERROR') >= 0) { %>
+		<p><%= i18n('There was a mistake in the system. Perhaps you have already answered to this invitation. See error message below:') %>
+		<div class="alert alert-danger" role="alert"><%= msg %></div>
+	<% } else { %>
+		<% if(req.query.answer == 'accept') { %>
+			<div class="alert alert-success" role="alert">
+				<h4><%= i18n('Invitation accepted :)') %></h4>
+				<%= i18n('Your answer is now saved, welcome to the stand!') %></div>
+				<p>
+					<% var link = 'http://' + req.headers.host + '/login' %>
+					<%= i18n('You can use the link below to view your personal assignment calendar.') %><br>
+					<a href="<%= link %>"><%= link %></a>
+				</p>
+		<% } else { %>
+			<div class="alert alert-info" role="alert">
+				<h4><%= i18n('Invitation declined :(') %></h4>
+				<%= i18n('Your answer is now saved!') %></div>
+		<% } %>
+	<% } %>
+
 </div>
