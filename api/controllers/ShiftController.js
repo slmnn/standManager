@@ -56,6 +56,7 @@ module.exports = {
 				})
 			};
 			var findStand = function(cb) {
+				if(shift == null) return cb("ERROR: No shift");
 				Stand.findOne(shift.stand_id).exec(function(err, s){
 					if(err) return cb(err);
 					stand = s;
@@ -63,6 +64,7 @@ module.exports = {
 				})
 			}
 			var findAttendees = function(cb) {
+				if(shift == null) return cb("ERROR: No shift");
 				Shift.find({stand_id: shift.stand_id + ''})
 				.where({ start : shift.start })
 				.where({ end : shift.end })
