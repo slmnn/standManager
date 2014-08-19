@@ -44,6 +44,42 @@ module.exports = {
 			});
 		}
 	},
+	users : function(req, res) {
+		if(req.method == 'GET') {
+			var stand; 
+			var users = [];
+			var unsent_email_count = 0;
+			var findStand = function(cb) {
+				Stand.findOne(req.params.id).exec(function(err, s){
+					if(err) cb(err);
+					stand = s;
+					cb(err, s);
+				});				
+			};
+			var findUsers = function(cb) {
+				User.find().exec(function(err, u_all){
+					if(err) cb(err);
+					for(var i = 0; i < u_all.length; i++) {
+						for(var j = 0; j < u_all[i].stands.length; j++) {
+							if(u_all[i].stands[j] == req.params.id) {
+								users.push(u_all[i]);
+							}
+						}
+					}
+					users = users.reduce(function(a,b){if(a.indexOf(b)<0)a.push(b);return a;},[]);
+					cb(err, users);
+				});
+			};
+			var renderView = function(err) {
+				if(err) res.send(err, 500);
+				return res.view({
+					stand: stand,
+					users: users
+				});				
+			}
+			async.parallel([findUsers, findStand], renderView);
+		}
+	},
 	invitations : function(req, res) {
 		if(req.method == 'GET') {
 			if(req.params.id == null) res.view({msg:"Stand ID is missing", invitations: [], stand: {}});

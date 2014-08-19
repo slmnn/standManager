@@ -1,6 +1,15 @@
 <%- partial('../partials/header')%>
 
 <div class="container">
+  <% if(stand.id != null) { %>
+  <ul class="nav nav-tabs" role="tablist">
+    <li><a href="/stand/users/<%= stand.id %>"><%= i18n('Personnel') %></a></li>
+    <li><a href="/stand/invitations/<%= stand.id %>"><%= i18n('Invitations') %></a></li>
+    <li class="active"><a href="/stand/questionnaires/<%= stand.id %>"><%= i18n('Questionnaires') %></a></li>
+    <li><a href="/stand/kickuser/<%= stand.id %>"><%= i18n('Remove participants') %></a></li>
+  </ul>
+  <% } %>
+  
   <div class="page-header"><h2><%= i18n('Questionnaires') %> <small><%= stand.name %></small></h2></div>
 
   <% if(stand.id != null) { %>

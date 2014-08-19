@@ -1,0 +1,27 @@
+<%- partial('../partials/header')%>
+
+<div class="container">
+  <div class="page-header"><h2><%= i18n('Invitations') %> <small><%= stand.name %></small></h2></div>
+
+  <% if(users.length == 0) { %>
+  	<p><%= i18n('You do not have any personnell yet!') %></p>
+  <% } else { %>
+  	<table class="table">
+  		<tr>
+  			<th><%= i18n('Name') %></th>
+        <th><%= i18n('Email') %></th>
+  			<th><%= i18n('Tel.') %></th>
+  			<th><%= i18n('Gender') %></th>
+  		</tr>
+  		<% _.each(users, function(u) { %>
+  			<tr>
+  				<td><%= (u.firstname + ' ' + u.lastname) %></td>
+  				<td><%= u.email %></td>
+  				<td><%= (u.tel ? u.tel : 'n/a') %></td>
+  				<td><%= u.gender %></td>
+  			</tr>
+  		<% }) %>
+  	</table>
+
+  <% } %>
+</div>
