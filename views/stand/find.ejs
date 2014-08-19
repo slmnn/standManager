@@ -25,27 +25,27 @@
         <h4 class="modal-title" id="assign_shift_title">Modal title</h4>
       </div>
       <div class="modal-body">
-      	<div>Nyt määrätty: <span id="assign_shift_now_assigned_to"></span>
-      		<button id="accept_shift_button" class="btn btn-success btn-xs pull-right" disabled>Merkitse hyväksytyksi</button> 
-      		<button id="unassign_shift_button" style="margin-left: 4px; margin-right: 4px;" class="btn btn-warning btn-xs pull-right">Pura vuoromääräys</button><br>
-      		Users available: <span id="users_available_count"></span></div>
+      	<div><%= i18n("Shift is assigned to") %> <span id="assign_shift_now_assigned_to"></span>
+      		<button id="accept_shift_button" class="btn btn-success btn-xs pull-right" disabled><%= i18n('Mark accepted') %></button> 
+      		<button id="unassign_shift_button" style="margin-left: 4px; margin-right: 4px;" class="btn btn-warning btn-xs pull-right"><%= i18n('Unassign') %></button><br>
+      		<%= i18n("Users available:") %> <span id="users_available_count"></span></div>
 				<form action="/shift/update" id="assign_shift_form" method="post" role="form">
 					<fieldset>
-				    <legend>Määrää henkilö vuorolle</legend>
+				    <legend><%= i18n('Assign the shift to') %></legend>
 				    <div class="form-group">
-				      <label for="input_assigned_to_id">Nimi</label>
+				      <label for="input_assigned_to_id"><%= i18n('Name') %></label>
 				      <select id="input_assigned_to_id" name="input_assigned_to_id" class="form-control"></select>
 				    </div>
 				    <div class="form-group">
-				      <button id="input_submit" name="input_submit" class="btn btn-primary pull-right">Tee vuoromääräys</button>
+				      <button id="input_submit" name="input_submit" class="btn btn-primary pull-right"><%= i18n('Assign') %></button>
 				    </div>
 
 				  </fieldset>
 				</form>
       </div>
       <div class="modal-footer">
-			  <button id="delete_shift_button" class="btn btn-danger">Poista vuoro</button>
-			  <button type="button" class="btn btn-default" data-dismiss="modal">Sulje</button>
+			  <button id="delete_shift_button" class="btn btn-danger"><%= i18n('Delete shift') %></button>
+			  <button type="button" class="btn btn-default" data-dismiss="modal"><%= i18n('Close') %></button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

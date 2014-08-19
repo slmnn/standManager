@@ -95,7 +95,7 @@ module.exports = {
 	},
 	unsentEmailCount : function(req, res) {
 		if(req.method == 'GET') {
-			Shift.find({stand_id:req.params.id})
+			Shift.find({stand_id:req.params.id+''})
 			.where({email_sent:false})
 			.where({accepted:false})
 			.where({assigned:true})
@@ -103,6 +103,21 @@ module.exports = {
 				if(err) return res.json({msg:err});
 				return res.json({unsentEmailCount:c.length});
 			});
+		}
+	},
+	upcomingShiftCount : function(req, res) {
+		if(req.method == 'GET') {
+			var now = new Date();
+			if(req.params.id == null || req.query.stand_id == null) {
+				return res.send("id or stand_id is null", 404)
+			}
+			Shift.find({assigned_to_id:req.params.id+''})
+			.where({stand_id:req.query.stand_id})
+		  .where({start : { ">=" : now}})
+			.exec(function(err, shifts){
+				if(err) return res.json({error:err, shift_count:NaN});
+				return res.json({error:err, shift_count:shifts.length});
+			})
 		}
 	},
 	sendEmails : function(req, res) {
