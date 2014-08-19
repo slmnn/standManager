@@ -239,6 +239,7 @@ module.exports = {
 					id : s[i].id,
 					assigned : s[i].assigned_to_id == null ? false : true,
 					assigned_to_name : s[i].assigned_to_name,
+					assigned_to_id : s[i].assigned_to_id,
 					accepted : s[i].accepted,
 					start: moment(s[i].start).format("YYYY-MM-DD HH:mm"),
 					end: moment(s[i].end).format("YYYY-MM-DD HH:mm"),

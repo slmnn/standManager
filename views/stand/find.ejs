@@ -25,7 +25,10 @@
         <h4 class="modal-title" id="assign_shift_title">Modal title</h4>
       </div>
       <div class="modal-body">
-      	<div id="assign_shift_now_assigned_to"></div>
+      	<div><%= i18n("Shift is assigned to") %> <span id="assign_shift_now_assigned_to"></span>
+      		<button id="accept_shift_button" class="btn btn-success btn-xs pull-right" disabled><%= i18n('Mark accepted') %></button> 
+      		<button id="unassign_shift_button" style="margin-left: 4px; margin-right: 4px;" class="btn btn-warning btn-xs pull-right"><%= i18n('Unassign') %></button><br>
+      		<%= i18n("Users available:") %> <span id="users_available_count"></span></div>
 				<form action="/shift/update" id="assign_shift_form" method="post" role="form">
 					<fieldset>
 				    <legend><%= i18n('Assign the shift to') %></legend>
@@ -41,8 +44,7 @@
 				</form>
       </div>
       <div class="modal-footer">
-			  <button id="delete_shift_button" class="btn btn-danger"><%= i18n('Delete') %></button>
-			  <button id="unassign_shift_button" class="btn btn-warning"><%= i18n('Unassign') %></button>
+			  <button id="delete_shift_button" class="btn btn-danger"><%= i18n('Delete shift') %></button>
 			  <button type="button" class="btn btn-default" data-dismiss="modal"><%= i18n('Close') %></button>
       </div>
     </div><!-- /.modal-content -->
@@ -108,6 +110,32 @@ $( "#unassign_shift_button" ).click(function( event ) {
 	var posting = $.post( '/shift/update/' + last_calendar_event_clicked.id, 
 		{ 
 			input_assigned_to_id: '-1'
+		} 
+	).done(function(data) {
+    var content = data.msg;
+    var box = bootbox.alert('' + content);
+		setTimeout(function() {
+    	box.modal('hide');
+    	$('#calendar').fullCalendar( 'refetchEvents' );
+		}, 1500);
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err);
+  });
+});
+
+$( "#accept_shift_button" ).click(function( event ) {
+  // Stop form from submitting normally
+  event.preventDefault();
+  $("#assign_shift_modal").modal("hide");	
+  var assigned_to_id   = last_calendar_event_clicked.assigned_to_id,
+      assigned_to_name = last_calendar_event_clicked.assigned_to_name;
+  // Send the data using post
+	var posting = $.post( '/shift/update/' + last_calendar_event_clicked.id, 
+		{ 
+			input_assigned_to_id   : assigned_to_id,
+			input_assigned_to_name : assigned_to_name,
+			input_accepted         : true,
+			input_email_sent       : true
 		} 
 	).done(function(data) {
     var content = data.msg;
@@ -203,9 +231,15 @@ $(document).ready(function() {
 		eventClick: function(calEvent, jsEvent, view) {
 			if(!calEvent.assigned) { 
 				$('#unassign_shift_button').prop('disabled', true);
+				$('#accept_shift_button').prop('disabled', true);
 			} else {
 				$('#unassign_shift_button').prop('disabled', false);
 				$('#unassign_shift_button').prop('enabled', true);
+				$('#accept_shift_button').prop('disabled', false);
+				$('#accept_shift_button').prop('enabled', true);
+				if(calEvent.accepted) {
+					$('#accept_shift_button').prop('disabled', true);
+				}
 			}
 			$.get("/stand/possibleusers/" + stand_id, 
 				{start: calEvent.start.format(), end: calEvent.end.format()}
@@ -218,12 +252,8 @@ $(document).ready(function() {
 				select.find('option').remove().end();
 				select.find('optgroup').remove().end();
 				$('#no_available_users').remove();
-				if(data.available_users.length == 0) {
-					$("<span id='no_available_users'>There are no users available!</span>").insertAfter( "#assign_shift_now_assigned_to" );
-				} else if(data.available_users.length == 1) {
-					$("<span id='no_available_users'>There is "+ data.available_users.length +" user available!</span>").insertAfter( "#assign_shift_now_assigned_to" );
-				} else {
-					$("<span id='no_available_users'>There are "+ data.available_users.length +" users available!</span>").insertAfter( "#assign_shift_now_assigned_to" );
+				if(data.available_users) {
+					$('#users_available_count').text(data.available_users.length);
 				}
 				$.each(data.available_users, function(i, user) {
 				  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname));
@@ -242,7 +272,7 @@ $(document).ready(function() {
 				}
 				$("#assign_shift_form").attr("action","/shift/update/" + calEvent.id);
 				var assigned_to_text = (calEvent.assigned_to_name == null || calEvent.assigned_to_name.length == 0) ? 'nobody' : calEvent.assigned_to_name;
-				$("#assign_shift_now_assigned_to").text("This shift is assigned to " + assigned_to_text);
+				$("#assign_shift_now_assigned_to").text(assigned_to_text);
 				$("#assign_shift_title").text(moment(calEvent.start).format('MMM Do') + " @ " + moment(calEvent.start).format('HH:mm') + "-" + moment(calEvent.end).format('HH:mm') + " " + calEvent.title);	
 				$('#assign_shift_modal').modal('show');
 

@@ -303,7 +303,7 @@ module.exports = {
 					assigned_to_name: req.body.input_assigned_to_name,
 					accepted: req.body.input_accepted ? true : false,
 					assigned: true,
-					email_sent: false
+					email_sent: req.body.input_email_sent ? true : false
 				};
 				message = "Shift assigned to " + req.body.input_assigned_to_name;
 			} else {
