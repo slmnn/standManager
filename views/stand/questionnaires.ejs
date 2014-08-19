@@ -9,7 +9,7 @@
     <li><a href="/stand/kickuser/<%= stand.id %>"><%= i18n('Remove participants') %></a></li>
   </ul>
   <% } %>
-  
+
   <div class="page-header"><h2><%= i18n('Questionnaires') %> <small><%= stand.name %></small></h2></div>
 
   <% if(stand.id != null) { %>
@@ -29,7 +29,8 @@
   			<th><%= i18n('Updated') %></th>
   			<th><%= i18n('User email') %></th>
   			<th><%= i18n('Answered') %></th>
-  			<th><%= i18n('Expires') %></th>
+        <th><%= i18n('Expires') %></th>
+  			<th><%= i18n('Link') %></th>
   		</tr>
   		<% _.each(questionnaires, function(i) { %>
   			<tr>
@@ -38,6 +39,9 @@
   				<td class="<%= (i.filled ? 'success' : 'warning') %>"><%= (i.filled ? 'Yes' : 'No') %></td>
           <% var expires = new Date(i.expires); var now = new Date(); %>
   				<td class="<%= (now.getTime() < expires.getTime() ? 'success' : 'danger') %>"><%= expires.toDateString() %></td>
+          <% var link = ('http://' + req.headers.host + '/questionnaire/find/' + i.id + '?email=' + i.email + '&user_id=' + i.user_id);
+                 link = link.replace('+','%2B'); %>
+          <td><a href="<%= link %>">#</a></td>
   			</tr>
   		<% }) %>
   	</table>

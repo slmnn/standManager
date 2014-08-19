@@ -30,7 +30,8 @@
   			<th><%= i18n('Date') %></th>
   			<th><%= i18n('Invitee email') %></th>
   			<th><%= i18n('Acc. / Decl.') %></th>
-  			<th><%= i18n('Expires') %></th>
+        <th><%= i18n('Expires') %></th>
+  			<th><%= i18n('Link') %></th>
   		</tr>
   		<% _.each(invitations, function(i) { %>
   			<tr>
@@ -38,6 +39,8 @@
   				<td><%= i.email %></td>
   				<td><%= (i.accepted ? 'Accepted' : (i.declined ? 'Declined' : 'No answer')) %></td>
   				<td><%= new Date(i.expires).toDateString() %></td>
+          <% var link = ('http://' + req.headers.host + '/invitation/find/' + i.id); %>
+          <td><a href="<%= link %>">#</a></td>
   			</tr>
   		<% }) %>
   	</table>
