@@ -35,6 +35,7 @@
 				    <div class="form-group">
 				      <label for="input_assigned_to_id"><%= i18n('Name') %></label>
 				      <select id="input_assigned_to_id" name="input_assigned_to_id" class="form-control"></select>
+				      <p class="help-block"><%= i18n("This user has") %> <span id="upcoming_shift_count"></span> <%= i18n("upcoming shift(s)") %>.</p>
 				    </div>
 				    <div class="form-group">
 				      <button id="input_submit" name="input_submit" class="btn btn-primary pull-right"><%= i18n('Assign') %></button>
@@ -188,6 +189,11 @@ $('#input_assigned_to_id').on('change', function() {
     } else {
         $('optgroup option').prop('disabled', false);
     }
+    var assigned_to_id = $("#input_assigned_to_id").val();
+    $.get('/shift/upcomingShiftCount/' + assigned_to_id + '?stand_id=' + stand_id)
+    .done(function(result) {
+      $("#upcoming_shift_count").text(result.shift_count); 	
+	  });
 });
 
 });
@@ -275,7 +281,11 @@ $(document).ready(function() {
 				$("#assign_shift_now_assigned_to").text(assigned_to_text);
 				$("#assign_shift_title").text(moment(calEvent.start).format('MMM Do') + " @ " + moment(calEvent.start).format('HH:mm') + "-" + moment(calEvent.end).format('HH:mm') + " " + calEvent.title);	
 				$('#assign_shift_modal').modal('show');
-
+		    var assigned_to_id = $("#input_assigned_to_id").val();
+		    $.get('/shift/upcomingShiftCount/' + assigned_to_id + '?stand_id=' + stand_id)
+		    .done(function(result) {
+		      $("#upcoming_shift_count").text(result.shift_count); 	
+			  });
 			}).fail(function(err) {
 	    	var box = bootbox.alert("ERROR: " + err);
 	  	});

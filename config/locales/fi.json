@@ -120,7 +120,8 @@
   "Accept"       : "Hyväksy",
   "Assign"       : "Tee vuoromääräys",
   "Reject"       : "Hylkää",
-  "Reject"       : "Hylkää"
+  "This user has"       : "Tällä henkilöllä on",
+  "upcoming shift(s)"       : "tulevaa vuoro(a)"
   
 
 }
