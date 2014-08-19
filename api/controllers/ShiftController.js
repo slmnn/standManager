@@ -8,6 +8,7 @@
 var async = require("async");
 var moment = require('moment');
 var nodemailer = require('nodemailer');
+var icalendar = require('icalendar');
 
 module.exports = {
 	response : function(req, res)  {
@@ -31,8 +32,60 @@ module.exports = {
 				}
 				shift.save(function(err) {
 					if(err) return res.view({msg:'ERROR: Saving shift failed. ' + err});
-					return res.view({msg:'OK', answer_was_yes: shift.accepted});
+					return res.view({msg:'OK', answer_was_yes: shift.accepted, shift:shift});
 				})
+			})
+		}
+	},
+	find : function(req, res) {
+		if(req.method == 'GET') {
+			var shift = {};
+			var stand = {};
+			var attendees = [];
+			if(req.query.user_id == null || req.params.id == null) {
+				return res.send("ERROR: Invalid parameters");
+			}
+			var findShift = function(cb) {
+				Shift.findOne(req.params.id + '')
+				.where({assigned_to_id:req.query.user_id})
+				.where({assigned: true})
+				.exec(function(err, s) {
+					if(err) return cb(err);
+					shift = s;
+					return cb();
+				})
+			};
+			var findStand = function(cb) {
+				Stand.findOne(shift.stand_id).exec(function(err, s){
+					if(err) return cb(err);
+					stand = s;
+					cb();
+				})
+			}
+			var findAttendees = function(cb) {
+				Shift.find({stand_id: shift.stand_id + ''})
+				.where({ start : shift.start })
+				.where({ end : shift.end })
+				.exec(function(err, other_shifts) {
+					var query = [];
+					for(var i = 0; i < other_shifts.length; i++) {
+						query.push(other_shifts[i].assigned_to_id);
+					}
+					User.find({id:query}).exec(function(err, other_users) {
+						if(err) return cb(err);
+						for(var i = 0; i < other_users.length; i++) {
+							attendees.push({
+								name : other_users[i].firstname + ' ' + other_users[i].lastname,
+								email: other_users[i].email,
+								tel  : other_users[i].tel
+							})
+						}
+						return cb();
+					});
+				});
+			};
+			async.series([findShift, findStand, findAttendees], function(err) {
+				return res.view({err:err, shift:shift, stand:stand, attendees:attendees})
 			})
 		}
 	},
@@ -72,8 +125,9 @@ module.exports = {
 		    }
 			});
 			async.forEach(shifts, function(shift, cb) {
+
 				// Finding other users on the same shift
-				console.log(shift.start);
+				console.log(shift.start, {stand_id:req.params.id + ''});
 				Shift.find({stand_id:req.params.id + ''})
 				.where({ start : shift.start })
 				.where({ end : shift.end })
@@ -87,6 +141,7 @@ module.exports = {
 					
 					User.find({id:query}).exec(function(err, other_users) {
 						if(err) return cb(err);
+
 						console.log('OTHER_USERS:', other_users);
 						var original_user = {};
 						for(var i = 0; i < other_users.length; i++) {
@@ -94,12 +149,22 @@ module.exports = {
 								original_user = other_users[i];
 						}
 						console.log('ORIGINAL USER:', original_user);
+
 						// Compose email
 						var user_contact_info = "";
+						var ical_description = "";
+						var attendees = [];
 						for(var i = 0; i < other_users.length; i++) {
 							user_contact_info += other_users[i].firstname + ' ' + other_users[i].lastname + ' ';
 							user_contact_info += '(tel.: ' + other_users[i].tel + ') <br>';
+							ical_description += other_users[i].firstname + ' ' + other_users[i].lastname + ' (tel.: ' + other_users[i].tel + ') ';
+							attendees.push({
+								name: other_users[i].firstname + ' ' + other_users[i].lastname,
+								email: other_users[i].email
+							})
 						}
+
+						// Find the stand that we create the shift to
 						Stand.findOne({id:shift.stand_id}).exec(function(err, stand){
 							if(err) return cb(err);
 							var link = 'http://' + req.headers.host + '/shift/response/' + shift.id + '?user_id=' + original_user.id;
@@ -120,19 +185,47 @@ module.exports = {
 							html_message_with_link = html_message_with_link.replace('_shiftday',start.toLocaleDateString());
 							html_message_with_link = html_message_with_link.replace('_shiftstarttime',start.toLocaleTimeString());
 							html_message_with_link = html_message_with_link.replace('_shiftendtime',end.toLocaleTimeString());
+							var shiftlink = 'http://' + req.headers.host + '/shift/find/' + shift.id + '?user_id=' + shift.assigned_to_id
+							html_message_with_link = html_message_with_link.replace('_shiftlink',shiftlink);
+							html_message_with_link = html_message_with_link.replace('_shiftlink',shiftlink);
+
+							// Create iCal
+							var ical = new icalendar.VEvent(start.getTime());
+							ical.setSummary(shift.title);
+							ical.setLocation(stand.location);
+							ical.setDescription(ical_description);
+							ical.setDate(start, end);
+							var parameters = {
+							'CN' : req.user[0].firstname + ' ' + req.user[0].lastname + ':mailto'
+							}
+							ical.addProperty('ORGANIZER', req.user[0].email, parameters);
+							for(var i = 0; i < attendees.length; i++) {
+								ical.addProperty('ATTTENDEE', 'CN=' + attendees[i].name + ':mailto:' + attendees[i].email, '');
+							}
+							console.log(ical.toString());
+
+							// Create the email
 							var mailOptions = {
 						    from: shift.title, // sender address
 						    to: original_user.email, // list of receivers
 						    subject: 'Stand assignment', // Subject line
 						    text: 'Sorry, this message is in HTML.', // plaintext body
-						    html: html_message_with_link  // html body
+						    html: html_message_with_link,  // html body
+						    alternatives: [{
+                      contentType: "text/calendar; charset=UTF-8; method=REQUEST",
+											filename: 'invite.ics',
+								      content: new Buffer(ical.toString()),
+                      contentEncoding: "7bit"
+                    }]
 							};
-							console.log("Sending:",JSON.stringify(mailOptions));
+
 							// send mail with defined transport object
 							transporter.sendMail(mailOptions, function(error, info){
 						    if(error){
 						      cb('Sending shift assignment failed! ERROR: ' + error);	
 						    }else{
+
+						    	// Update the shift email_sent parameter
 						    	shift.email_sent = true;
 						    	shift.save(function(err, new_shift) {
 						    		if(err) cb(err);

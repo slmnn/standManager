@@ -18,10 +18,10 @@ module.exports = {
   Hei _receivername,<br><br>\
   Tarjoamme sinulle vuoroa, jonka tiedot näkyvät alla: <br>\
   <hr>\
+  <p><b>_shiftday _shiftstarttime - _shiftendtime</b></p>\
   <p><b>_standname</b><br>\
   _standdescription<br>\
   _standlocation (<a href="_maplink">kartta</a>)</p>\
-  <p><b>_shiftday _shiftstarttime - _shiftendtime</b></p>\
   <hr>\
   <p>Tälle vuorolle on kutsuttu: <br>\
   _otherusersonduty\
@@ -36,7 +36,9 @@ module.exports = {
           <a href="_nourl" target="_blank" style="color:#FFFFFF; font-family:Helvetica, Arial, sans-serif; font-size:16px; font-weight:bold; text-decoration:none;">Ei kiitos</a>\
       </td>\
     </tr>\
-  </table>',
+  </table>\
+  <p>Jos hyväksyt vuorotarjouksen, voit tarkistaa vuoron tiedot alla olevasta linkistä<br>\
+  <a href="_shiftlink">_shiftlink</a></p>',
   invitation_email_subject: 'Kutsu esittelypisteen käyttäjäksi (_standname)',
   invitation_email: ' \
   Hei _receivername,<br><br>\

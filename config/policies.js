@@ -24,6 +24,7 @@ module.exports.policies = {
     "create": false
   },
   ShiftController: {
+    "find":true,
     "response": true
   },
   InvitationController: {
