@@ -18,17 +18,23 @@ module.exports = {
 			.where({declined:false})
 			.exec(function(err, i){
 				if(err) return res.send("ERROR (invalid invitation)" + err, 500);
-				if(i==null) return res.view({msg:"ERROR: Invitation is no longer available!"}, 200);
+				if(i==null) return res.view({msg:"ERROR: Invitation is no longer available!"});
 				if(req.query.answer == "decline") {
 					i.declined = true;
 					i.save(function(err, new_i) {
 						User.findOne(req.query.user_id).exec(function(err, user) {
 							if(user.stands.length == 0) {
-								User.destroy({id:user.id},function(err) {
-									return res.view({msg:"You have declined the invitation, and your credentials are destroyed!"}, 200);
-								})
+								User.destroy({id:user.id})
+								.exec(function(err) {
+									console.log("User destroyed!", err);
+									return res.view({msg:"You have declined the invitation, and your credentials are destroyed!"});
+								});
+								console.log("User destroyed!!");
+							} else {
+								// TODO: destroy invitation
+								console.log("Invitation declined!");
+								return res.view({msg:"You have declined the invitation!"});								
 							}
-							return res.view({msg:"You have declined the invitation!"}, 200);
 						})
 					})
 				} else {
@@ -42,16 +48,18 @@ module.exports = {
 							User.findOne(req.query.user_id).exec(function(err, u) {
 								if(!u || err) return res.send("ERROR (invalid user) " + err, 500);
 								if(u.stands.indexOf(i.stand_id) != -1) {
+									// TODO: destroy invitation
 									return res.view({msg:"ERROR: You are already member of this stand!"});
 								}
 								u.stands.push(i.stand_id + "");
 								User.update({id:u.id},{stands:u.stands}, function(err, new_u) {
+									// TODO: destroy invitation
 									return res.view({msg:"You have accepted the invitation!"});
 								})
 							})
 						})
 					} else {
-						return res.view({msg:"ERROR: Invitation is expired!"}, 200);
+						return res.view({msg:"ERROR: Invitation is expired!"});
 					}
 				}
 			})
