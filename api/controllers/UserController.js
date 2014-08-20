@@ -233,9 +233,11 @@ module.exports = {
 			var google_calendar = {};
 			async.series([getRefreshToken, function(cb) {
 				google_calendar = new gcal.GoogleCalendar(accessToken);
+				if(google_calendar == null) cb("Google calendar is null");
 				return cb();
 			}], function(err) {
 				var all_events = [];
+				if(err != null) return res.json([]);
 				if(req.user[0].google_calendar_imported == null) return res.json([]);
 				var calendars = req.user[0].google_calendar_imported;
 				async.forEach(calendars, function(calendar, cb) {
