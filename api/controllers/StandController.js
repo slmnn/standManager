@@ -192,8 +192,8 @@ module.exports = {
 				// (StartDate1 <= EndDate2) and (StartDate2 <= EndDate1) -> Times overlap
 				async.forEach(all_users, function(user, cb) {
 					Reservation.find({user_id:user.id})
-					.where({ start: { '<=': end }})
-					.where({ end: { '>=': start }})
+					.where({ start: { '<': end }})
+					.where({ end: { '>': start }})
 					.exec(function(err, r){
 						for(var i=0; i < r.length; i++) {
 							reserved_user_ids.push(r[i].user_id);

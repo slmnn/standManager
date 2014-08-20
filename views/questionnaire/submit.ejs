@@ -11,10 +11,10 @@
 		<th><%= i18n('14-16') %></th>
 		<th><%= i18n('16-18') %></th>
 	</tr>
-	<% var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] %>
+	<% var days = [i18n('Sun'),i18n('Mon'),i18n('Tue'),i18n('Wed'),i18n('Thu'),i18n('Fri'),i18n('Sat')] %>
 	<% _.each(reservation_table, function(r, i){ %>
 		<tr>
-			<th><%= days[i] %></th>
+			<th><%= i18n(days[i]) %></th>
 			<% _.each(r, function(slot){ %>
 			<td class="<%= (slot == 'available') ? 'success' : 'danger' %>"><%= i18n(slot) %></td>
 			<% }); %>
@@ -22,6 +22,9 @@
 	<% }); %>
 	
 </table>
+
+<% var expire_str = moment(expires).format('YYYY-MM-DD') %>
+<p><%= i18n("Your answers expire in") %> <%= expire_str %>. <%= i18n("Please fill the form again before that") %>.</p>
 
 <p><%= i18n("You can fill the questionnaire again at any time.") %> <%= i18n("You can use the same questionnaire link as you did today.") %> <%= i18n("Click") %> <a href="javascript:history.back()"><%= i18n("here") %></a> <%= i18n("to modify your answers now.") %></p>
 

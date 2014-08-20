@@ -254,7 +254,7 @@
     <label class="col-md-4 control-label" for="input_valid"><%= i18n("My answers are valid until") %></label>  
     <div class="col-md-4">
     <input id="input_valid" name="input_valid" type="date" class="form-control input-md" required="">
-    <p class="help-block">YYYY-MM-DD</p>
+    <p class="help-block"><%= i18n("YYYY-MM-DD") %></p>
     </div>
   </div>
 </div>
@@ -286,9 +286,13 @@ function checkAll(formname, checktoggle)
       }
     }
   }
-$(document).ready(function() {  
+$(document).ready(function() { 
+  var today = new Date();
+  var week_later = moment(new Date(today.getTime() + 1000*60*60*24*7));
+  $( "input[type=date]" ).val(week_later.format('YYYY-MM-DD'))
   if (!Modernizr.inputtypes.date) { 
     $( "input[type=date]" ).datepicker({ dateFormat: "yy-mm-dd" }); 
   }
+  checkAll('questionnaire_form', true);
 });
 </script>

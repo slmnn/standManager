@@ -33,6 +33,7 @@ var dateCount = function(start, end) {
 module.exports = {
 	submit: function(req, res) {
 		if(req.method == 'POST') {
+
 			var questionnaire = {};
 			var user = {};
 			var new_reservations = [];
@@ -46,7 +47,9 @@ module.exports = {
 			week_available.push(req.body.input_saturday  ? req.body.input_saturday  : []);
 			console.log(week_available);
 			var now = new Date();
+			var week_later = new Date(now.getTime() + 1000*60*60*24*7);
 			var expires = new Date(req.body.input_valid + 'T23:59:00');
+			if(isNaN( expires.getTime() )) expires = week_later;
 			var dates = dateCount(now, expires);
 			var shift_start_times = ['8','10','12','14','16'];
 
@@ -125,6 +128,7 @@ module.exports = {
 						return res.view(
 							{
 								response:req.body, 
+								expires:expires,
 							  new_reservations: new_reservations, 
 							  reservation_table: reservation_table
 							}
