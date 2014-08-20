@@ -146,6 +146,18 @@ $( "#accept_shift_button" ).click(function( event ) {
 				setTimeout(function() {
 		    	box.modal('hide');
 		    	$('#calendar').fullCalendar( 'refetchEvents' );
+					var posting = $.post( '/shift/sendShiftReminder/' + last_calendar_event_clicked.id, 
+						{ 
+							input_user_id  : assigned_to_id,
+							input_stand_id : stand_id
+						} 
+					).done(function(data) {
+				    var content = data.msg;
+				    var box = bootbox.alert('' + content);
+						setTimeout(function() {
+				    	box.modal('hide');
+						}, 1500);
+				  })
 				}, 1500);
 		  }).fail(function(err) {
 		    var box = bootbox.alert("ERROR: " + err);

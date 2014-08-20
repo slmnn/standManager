@@ -21,22 +21,72 @@ module.exports = {
 			.where({accepted:false})
 			.exec(function(err, shift) {
 				if(err || shift == null) return res.view({msg:'ERROR: shift is undefined. ' + err});
-				if(req.query.answer == 'yes') {
-					shift.accepted = true;
-					// TODO: send email confirmation
-				} else if(req.query.answer == 'no') {
-					shift.assigned_to_id = null;
-					shift.assigned_to_name = '';
-					shift.accepted = false;
-					shift.assigned = false;
-					shift.email_sent = false;
-				}
-				shift.save(function(err) {
-					if(err) return res.view({msg:'ERROR: Saving shift failed. ' + err});
-					User.findOne(shift.created_by).exec(function(err, shift_creator) {
-						return res.view({msg:'OK', answer_was_yes: shift.accepted, shift:shift, created_by:shift_creator});
-					});
+				utils.createTrace(
+					{
+						stand_id:shift.stand_id,user_id:shift.assigned_to_id, user_name:shift.assigned_to_name, shift_id:shift.id, shift_start:shift.start, shift_end:shift.end,
+					  message: ("Answer was " + req.query.answer)
+					}, 
+					function(err) {
+						if(req.query.answer == 'yes') {
+							shift.accepted = true;
+							// TODO: send email confirmation
+						} else if(req.query.answer == 'no') {
+							shift.assigned_to_id = null;
+							shift.assigned_to_name = '';
+							shift.accepted = false;
+							shift.assigned = false;
+							shift.email_sent = false;
+						}
+						shift.save(function(err) {
+							if(err) return res.view({msg:'ERROR: Saving shift failed. ' + err});
+							User.findOne(shift.created_by).exec(function(err, shift_creator) {
+								return res.view({msg:'OK', answer_was_yes: shift.accepted, shift:shift, created_by:shift_creator});
+							});
+						})						
+					})
+			})
+		}
+	},
+	sendShiftReminder : function(req, res) {
+		if(req.method == 'POST'){
+			var user = undefined;
+			var stand = undefined;
+			var shift = undefined;
+			var findUser = function(cb){
+				User.findOne(req.body.input_user_id).exec(function(err, u){
+					user = u;
+					cb();
 				})
+			};
+			var findStand = function(cb) {
+				Stand.findOne(req.body.input_stand_id).exec(function(err, s){
+					stand = s;
+					cb();
+				})
+			};
+			var findShift = function(cb) {
+				Shift.findOne(req.params.id).exec(function(err, s){
+					shift = s;
+					cb();
+				})
+			};
+			async.series([findUser, findStand, findShift], function(err){
+				var start = moment(shift.start);
+				var end = moment(shift.end);
+				var locales = req.acceptedLanguages;
+				if(locales.length > 0 && locales[0].indexOf('fi') >= 0) {
+					start = moment(shift.start).lang('fi');
+					end = moment(shift.end).lang('fi');
+				}
+				var link = 'http://' + req.headers.host + '/shift/find/' + shift.id + '?user_id=' + shift.assigned_to_id
+				utils.sendEmail({
+					from: req.user[0].email,
+					to: user.email,
+					subject: "Muistutus vuoromääräyksestä " + start.format('dddd DD. MMMM YYYY') + ', ' + start.format('HH:mm') + ' - ' + end.format('HH:mm'),
+					html: "<p>Tarkista vuoron tiedot alla olevasta linkistä.<br><a href='"+link+"''>"+link+"</a></p>"
+				}, function(err) {
+					res.json({msg:err});
+				})				
 			})
 		}
 	},
@@ -306,7 +356,7 @@ module.exports = {
 					assigned: false
 				}
 			).exec(function(err, s){
-				console.log(err, s);
+				// console.log(err, s);
 				if(err) res.send(500, {error: err});
 				return res.json({msg:'Shift created!'});	
 			});	
@@ -330,15 +380,15 @@ module.exports = {
 			return res.view();
 		}
 		if(req.method == 'POST') {
-			console.log(req.body.input_start, req.body.input_end, req.body.input_assigned_to_id);
+			// console.log(req.body.input_start, req.body.input_end, req.body.input_assigned_to_id);
 			var new_data = {};
 			if(req.body.input_assigned_to_id != '-1') {
 				new_data = {
 					assigned_to_id: req.body.input_assigned_to_id,
 					assigned_to_name: req.body.input_assigned_to_name,
-					accepted: req.body.input_accepted ? true : false,
+					accepted: req.body.input_accepted == 'true' ? true : false,
 					assigned: true,
-					email_sent: req.body.input_email_sent ? true : false
+					email_sent: req.body.input_email_sent == 'true' ? true : false
 				};
 				message = "Shift assigned to " + req.body.input_assigned_to_name;
 			} else {
@@ -355,7 +405,7 @@ module.exports = {
 				{'id' : req.params.id},
 				new_data
 			).exec(function(err, s){
-				console.log(err, s);
+				// console.log(err, s);
 				if(err) res.send(500, {error: err});
 				return res.json({msg:message});	
 			});	

@@ -44,6 +44,32 @@ module.exports = {
 			});
 		}
 	},
+	traces : function(req, res) {
+		if(req.method == 'GET') {
+			var search_start = {};
+			var search_end = {};
+			if(req.query.start) search_start = { createdAt: { '>=': new Date(req.query.start) }};
+			if(req.query.end) search_end = { createdAt: { '<=': new Date(req.query.end) }};
+
+			var search_limit = {};
+			if(req.query.limit) search_limit = req.query.limit;
+			Stand.findOne({id:req.params.id+''})
+			.where({owner_id:req.user[0].id}).exec(function(err, stand){
+				Trace.find({stand_id:stand.id+''})
+				//.where(search_start)
+				//.where(search_end)
+				//.limit(search_limit)
+				.sort({ createdAt: 'desc' })
+				.exec(function(err, t){
+		      return res.view({
+		        traces : t,
+		        stand: stand
+		      });
+				});				
+			})
+
+		}
+	},
 	users : function(req, res) {
 		if(req.method == 'GET') {
 			var stand; 

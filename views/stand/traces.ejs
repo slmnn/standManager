@@ -1,0 +1,65 @@
+<%- partial('../partials/header')%>
+
+<div class="container">
+
+  <% if(stand != null && stand.id != null) { %>
+  <ul class="nav nav-tabs" role="tablist">
+    <li><a href="/stand/users/<%= stand.id %>"><%= i18n('Personnel') %></a></li>
+    <li><a href="/stand/invitations/<%= stand.id %>"><%= i18n('Invitations') %></a></li>
+    <li><a href="/stand/questionnaires/<%= stand.id %>"><%= i18n('Questionnaires') %></a></li>
+    <li class="active"><a href="/stand/traces/<%= stand.id %>"><%= i18n('Traces') %></a></li>
+    <li><a href="/stand/kickuser/<%= stand.id %>"><%= i18n('Remove participants') %></a></li>
+  </ul>
+  <% } %>
+
+  <div class="page-header"><h2><%= i18n('Traces') %> <small><%= stand.name %></small></h2></div>
+
+  <% if(traces.length == 0) { %>
+  	<p><%= i18n('You do not have any traces yet!') %></p>
+  <% } else { %>
+    <div class="input-group"> <span class="input-group-addon"><%= i18n('Filter') %></span>
+      <input id="filter" type="text" class="form-control" placeholder="<%= i18n('Type here...') %>">
+    </div>
+  	<table class="table">
+      <thead>
+  		<tr>
+        <th><%= i18n('Date') %></th>
+  			<th><%= i18n('Shift date') %></th>
+  			<th><%= i18n('Shift start time') %></th>
+  			<th><%= i18n('User name') %></th>
+        <th><%= i18n('Trace message') %></th>
+  		</tr>
+      </thead>
+  		<% _.each(traces, function(i) { %>
+      <tbody class="searchable">
+  			<tr>
+  				<td><%= moment(i.createdAt).format('YYYY-MM-DD HH:mm') %></td>
+  				<td><%= moment(i.shift_start).format('YYYY-MM-DD') %></td>
+  				<td><%= moment(i.shift_start).format('HH:mm') %></td>
+          <td><%= i.user_name %></td>
+  				<td><%= i.message %></td>
+  			</tr>
+      </tbody>
+  		<% }) %>
+  	</table>
+
+  <% } %>
+</div>
+
+<script>
+window.onload = function () {
+
+
+        $('#filter').keyup(function () {
+
+            var rex = new RegExp(jQuery(this).val(), 'i');
+            $('.searchable tr').hide();
+            $('.searchable tr').filter(function () {
+                return rex.test($(this).text());
+            }).show();
+
+        })
+
+
+};
+</script>
