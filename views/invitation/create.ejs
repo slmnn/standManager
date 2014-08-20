@@ -93,6 +93,8 @@ $( "#invite_user_form" ).submit(function( event ) {
     setTimeout(function() {
     	box.modal('hide');
     	$( "#invite_user_form" ).find( "#input_email" ).val('');
+    	$( "#invite_user_form" ).find( "#input_firstname" ).val('');
+    	$( "#invite_user_form" ).find( "#input_lastname" ).val('');
 		}, 1500);
   }).fail(function(err) {
     var box = bootbox.alert("ERROR: " + err);
