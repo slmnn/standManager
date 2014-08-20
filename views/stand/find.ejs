@@ -127,27 +127,32 @@ $( "#unassign_shift_button" ).click(function( event ) {
 $( "#accept_shift_button" ).click(function( event ) {
   // Stop form from submitting normally
   event.preventDefault();
-  $("#assign_shift_modal").modal("hide");	
-  var assigned_to_id   = last_calendar_event_clicked.assigned_to_id,
-      assigned_to_name = last_calendar_event_clicked.assigned_to_name;
-  // Send the data using post
-	var posting = $.post( '/shift/update/' + last_calendar_event_clicked.id, 
-		{ 
-			input_assigned_to_id   : assigned_to_id,
-			input_assigned_to_name : assigned_to_name,
-			input_accepted         : true,
-			input_email_sent       : true
-		} 
-	).done(function(data) {
-    var content = data.msg;
-    var box = bootbox.alert('' + content);
-		setTimeout(function() {
-    	box.modal('hide');
-    	$('#calendar').fullCalendar( 'refetchEvents' );
-		}, 1500);
-  }).fail(function(err) {
-    var box = bootbox.alert("ERROR: " + err);
+  var box = bootbox.confirm("You are about to accept the shift and override user email confirmation. Are you sure?", function(result) {
+  	if(result) {
+		  $("#assign_shift_modal").modal("hide");	
+		  var assigned_to_id   = last_calendar_event_clicked.assigned_to_id,
+		      assigned_to_name = last_calendar_event_clicked.assigned_to_name;
+		  // Send the data using post
+			var posting = $.post( '/shift/update/' + last_calendar_event_clicked.id, 
+				{ 
+					input_assigned_to_id   : assigned_to_id,
+					input_assigned_to_name : assigned_to_name,
+					input_accepted         : true,
+					input_email_sent       : true
+				} 
+			).done(function(data) {
+		    var content = data.msg;
+		    var box = bootbox.alert('' + content);
+				setTimeout(function() {
+		    	box.modal('hide');
+		    	$('#calendar').fullCalendar( 'refetchEvents' );
+				}, 1500);
+		  }).fail(function(err) {
+		    var box = bootbox.alert("ERROR: " + err);
+		  });  		
+  	}
   });
+
 });
 
 // Attach a submit handler to the form
@@ -262,18 +267,18 @@ $(document).ready(function() {
 					$('#users_available_count').text(data.available_users.length);
 				}
 				$.each(data.available_users, function(i, user) {
-				  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname));
+				  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname + (user.male ? ' (M)' : ' (F)')));
 				});
 				if(data.reserved_users.length > 0) {
 					select.append($("<optgroup />").val("disabled").attr("label", "Reserved users"));
 					$.each(data.reserved_users, function(i, user) {
-					  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname));
+					  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname + (user.male ? ' (M)' : ' (F)')));
 					});
 				}
 				if(data.assigned_users.length > 0) {
 					select.append($("<optgroup />").val("disabled").attr("label", "Assigned users"));
 					$.each(data.assigned_users, function(i, user) {
-					  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname));
+					  select.append($("<option />").val(user.id).text(user.firstname + ' ' + user.lastname + (user.male ? ' (M)' : ' (F)')));
 					});
 				}
 				$("#assign_shift_form").attr("action","/shift/update/" + calEvent.id);

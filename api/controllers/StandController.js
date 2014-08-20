@@ -201,7 +201,6 @@ module.exports = {
 						cb();
 					})
 				}, function(err) {
-					console.log("reserved: " + JSON.stringify(reserved_user_ids));
 					User.find({id:reserved_user_ids}).exec(function(err, u){
 						reserved_users = u;
 						cb();
@@ -224,7 +223,6 @@ module.exports = {
 						cb();
 					})
 				}, function(err) {
-					console.log("assigned: " + JSON.stringify(assigned_user_ids));
 					User.find({id:assigned_user_ids}).exec(function(err, u){
 						assigned_users = u;
 						cb();
@@ -238,7 +236,6 @@ module.exports = {
 				available_users_ids = available_users_ids.filter(function(n) {
 					return assigned_user_ids.indexOf(n) == -1;
 				});
-				console.log("available: " + JSON.stringify(available_users_ids));
 				User.find({id: available_users_ids}).exec(function(err, u) {
 					available_users = u;
 					cb();
