@@ -135,16 +135,20 @@ module.exports = {
 					};
 					needle.post('https://accounts.google.com/o/oauth2/token', post_data, 
 					  function(err, resp, body){
-					    console.log("NEW_ACCESS_TOKEN: ",body);
-					  	User.update({id:req.user[0].id},
-					  		{
-					  			google_calendar_accessToken  : body.access_token,
-					  		  google_calendar_token_expires: new Date(now.getTime() + (body.expires_in*1000))
-					  		},
-					  		function(err, new_user) {
-					  			accessToken = new_user.google_calendar_accessToken;
-									return cb();
-					  		});
+					  	if(body.error != null) {
+					  		console.log(body.error)
+					  	} else {
+					    	console.log("NEW_ACCESS_TOKEN: ",body);
+						  	User.update({id:req.user[0].id},
+						  		{
+						  			google_calendar_accessToken  : body.access_token,
+						  		  google_calendar_token_expires: new Date(now.getTime() + (body.expires_in*1000))
+						  		},
+						  		function(err, new_user) {
+						  			accessToken = new_user.google_calendar_accessToken;
+										return cb();
+						  		});
+					  	}
 					});
 
 				};
