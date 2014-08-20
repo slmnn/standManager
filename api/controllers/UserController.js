@@ -159,10 +159,15 @@ module.exports = {
 				google_calendar = new gcal.GoogleCalendar(accessToken);
 				return cb();
 			}], function(err) {
-			  google_calendar.calendarList.list(function(err, data) {
-			    if(err) return res.view({error:err, items : []});
-			    return res.view({items:data.items, error:''});
-			  });
+				if(err) {
+					console.log(err);
+					if(err) return res.view({error:err, items : []});
+				} else {
+				  google_calendar.calendarList.list(function(err, data) {
+				    if(err) return res.view({error:err, items : []});
+				    return res.view({items:data.items, error:''});
+				  });
+				}
 			});
 		}
 	},
@@ -237,7 +242,10 @@ module.exports = {
 				return cb();
 			}], function(err) {
 				var all_events = [];
-				if(err != null) return res.json([]);
+				if(err != null) {
+					console.log(err);
+					return res.json([]);
+				}
 				if(req.user[0].google_calendar_imported == null) return res.json([]);
 				var calendars = req.user[0].google_calendar_imported;
 				async.forEach(calendars, function(calendar, cb) {
@@ -272,7 +280,10 @@ module.exports = {
 						return cb();
 					});
 				}, function(err) {
-					if(err) return res.json([],200);
+					if(err) {
+						console.log(err);
+						return res.json([],200);
+					}
 					return res.json(all_events);
 				});				
 			});
