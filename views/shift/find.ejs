@@ -4,8 +4,8 @@
 		<div class="alert alert-danger" role="alert"><%= err %></div>
 	<% } else { %>
 		<h2><%= i18n('Assignment') %> <small><%= stand.name %></small></h2>
-		<% var start = new Date(shift.start); var end = new Date(shift.end); %>
-		<h3><i class="fa fa-calendar"></i> <%= (start.toLocaleDateString() + ' ' + start.toLocaleTimeString() + '-' + end.toLocaleTimeString()) %></h3>
+		<%  /* var start = new Date(shift.start); var end = new Date(shift.end); */ %>
+		<h3><i class="fa fa-calendar"></i> <%= (shift.start.format('dddd DD. MMMM YYYY') + ' ' + shift.start.format('HH:mm') + '-' + shift.end.format('HH:mm')) %></h3>
 		<dl class="dl-horizontal">
 		  <dt><%= i18n('Attendees') %></dt>
 		  <dd>

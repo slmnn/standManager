@@ -23,6 +23,7 @@ module.exports = {
 				if(err || shift == null) return res.view({msg:'ERROR: shift is undefined. ' + err});
 				if(req.query.answer == 'yes') {
 					shift.accepted = true;
+					// TODO: send email confirmation
 				} else if(req.query.answer == 'no') {
 					shift.assigned_to_id = null;
 					shift.assigned_to_name = '';
@@ -53,6 +54,18 @@ module.exports = {
 				.where({assigned: true})
 				.exec(function(err, s) {
 					if(err) return cb(err);
+					if(s == null) return cb("No such shift")
+					var start = s.start;
+					var end = s.end;
+					var locales = req.acceptedLanguages;
+					if(locales.length > 0 && locales[0].indexOf('fi') >= 0) {
+						start = moment(start).lang('fi');
+						end = moment(end).lang('fi');
+					}
+					s.start_original = s.start;
+					s.start = start;
+					s.end_original = s.end;
+					s.end = end;
 					shift = s;
 					return cb();
 				})
@@ -68,8 +81,8 @@ module.exports = {
 			var findAttendees = function(cb) {
 				if(shift == null) return cb("ERROR: No shift");
 				Shift.find({stand_id: shift.stand_id + ''})
-				.where({ start : shift.start })
-				.where({ end : shift.end })
+				.where({ start : shift.start_original })
+				.where({ end : shift.end_original })
 				.exec(function(err, other_shifts) {
 					var query = [];
 					for(var i = 0; i < other_shifts.length; i++) {
@@ -131,7 +144,7 @@ module.exports = {
 			.exec(function(err, s){
 				if(err) return cb(err);
 				shifts = s;
-				console.log("SENDING, SHIFTS: ", shifts);
+				// console.log("SENDING, SHIFTS: ", shifts);
 				cb();
 			});
 		};
@@ -146,13 +159,13 @@ module.exports = {
 			async.forEach(shifts, function(shift, cb) {
 
 				// Finding other users on the same shift
-				console.log(shift.start, {stand_id:req.params.id + ''});
+				//console.log(shift.start, {stand_id:req.params.id + ''});
 				Shift.find({stand_id:req.params.id + ''})
 				.where({ start : shift.start })
 				.where({ end : shift.end })
 				.exec(function(err, other_shifts) {
 					if(err) return cb(err);
-					console.log('ALL SHIFTS SAME TIME:', JSON.stringify(other_shifts));
+					//console.log('ALL SHIFTS SAME TIME:', JSON.stringify(other_shifts));
 					var query = [];
 					for(var i = 0; i < other_shifts.length; i++) {
 						query.push(other_shifts[i].assigned_to_id);
@@ -161,13 +174,13 @@ module.exports = {
 					User.find({id:query}).exec(function(err, other_users) {
 						if(err) return cb(err);
 
-						console.log('OTHER_USERS:', other_users);
+						//console.log('OTHER_USERS:', other_users);
 						var original_user = {};
 						for(var i = 0; i < other_users.length; i++) {
 							if(other_users[i].id == shift.assigned_to_id)
 								original_user = other_users[i];
 						}
-						console.log('ORIGINAL USER:', original_user);
+						//console.log('ORIGINAL USER:', original_user);
 
 						// Compose email
 						var user_contact_info = "";
@@ -199,17 +212,24 @@ module.exports = {
 							html_message_with_link = html_message_with_link.replace('_nourl',nolink);
 							var maplink = "http://maps.google.com/maps?q="+stand.lat+","+stand.lng+"&ll="+stand.lat+","+stand.lng+"&z=14"
 							html_message_with_link = html_message_with_link.replace('_maplink',maplink);
-							var start = new Date(shift.start);
-							var end = new Date(shift.end);
-							html_message_with_link = html_message_with_link.replace('_shiftday',start.toLocaleDateString());
-							html_message_with_link = html_message_with_link.replace('_shiftstarttime',start.toLocaleTimeString());
-							html_message_with_link = html_message_with_link.replace('_shiftendtime',end.toLocaleTimeString());
+
+							var locales = req.acceptedLanguages;
+							var start = moment(shift.start);
+							var end = moment(shift.end);
+							if(locales.length > 0 && locales[0].indexOf('fi') >= 0) {
+								start = moment(shift.start).lang('fi');
+								end = moment(shift.end).lang('fi');
+							}
+
+							html_message_with_link = html_message_with_link.replace('_shiftday',start.format('dddd DD. MMMM YYYY'));
+							html_message_with_link = html_message_with_link.replace('_shiftstarttime',start.format('HH:mm'));
+							html_message_with_link = html_message_with_link.replace('_shiftendtime',end.format('HH:mm'));
 							var shiftlink = 'http://' + req.headers.host + '/shift/find/' + shift.id + '?user_id=' + shift.assigned_to_id
 							html_message_with_link = html_message_with_link.replace('_shiftlink',shiftlink);
 							html_message_with_link = html_message_with_link.replace('_shiftlink',shiftlink);
 
 							// Create iCal
-							var ical = new icalendar.VEvent(start.getTime());
+							var ical = new icalendar.VEvent(start.valueOf());
 							ical.setSummary(shift.title);
 							ical.setLocation(stand.location);
 							ical.setDescription(ical_description);
@@ -219,15 +239,15 @@ module.exports = {
 							}
 							ical.addProperty('ORGANIZER', req.user[0].email, parameters);
 							for(var i = 0; i < attendees.length; i++) {
-								ical.addProperty('ATTTENDEE', 'CN=' + attendees[i].name + ':mailto:' + attendees[i].email, '');
+								ical.addProperty('ATTENDEE', 'CN=' + attendees[i].name + ':mailto:' + attendees[i].email, '');
 							}
-							console.log(ical.toString());
+							//console.log(ical.toString());
 
 							// Create the email
 							var mailOptions = {
 						    from: shift.title, // sender address
 						    to: original_user.email, // list of receivers
-						    subject: sails.config.shift_assignment_email_subject.replace('_shiftday', start.toLocaleDateString()), // Subject line
+						    subject: sails.config.shift_assignment_email_subject.replace('_shiftday', start.format('dddd DD. MMMM YYYY') + ', ' + start.format('HH:mm') + ' - ' + end.format('HH:mm')), // Subject line
 						    text: 'Sorry, this message is in HTML.', // plaintext body
 						    html: html_message_with_link,  // html body
 						    alternatives: [{
@@ -270,7 +290,7 @@ module.exports = {
 			return res.view();
 		}
 		if(req.method == 'POST') {
-			console.log(req.body.input_start, req.body.input_end);
+			//console.log(req.body.input_start, req.body.input_end);
 			Shift.create(
 				{
 					created_by: req.user[0].id,

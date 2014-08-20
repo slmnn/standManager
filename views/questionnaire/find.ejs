@@ -254,7 +254,7 @@
     <label class="col-md-4 control-label" for="input_valid"><%= i18n("My answers are valid until") %></label>  
     <div class="col-md-4">
     <input id="input_valid" name="input_valid" type="date" class="form-control input-md" required="">
-      
+    <p class="help-block">YYYY-MM-DD</p>
     </div>
   </div>
 </div>
@@ -276,14 +276,19 @@
 <script type="text/javascript" language="javascript">
 
 function checkAll(formname, checktoggle)
-{
-  var checkboxes = new Array(); 
-  checkboxes = document[formname].getElementsByTagName('input');
- 
-  for (var i=0; i<checkboxes.length; i++)  {
-    if (checkboxes[i].type == 'checkbox')   {
-      checkboxes[i].checked = checktoggle;
+  {
+    var checkboxes = new Array(); 
+    checkboxes = document[formname].getElementsByTagName('input');
+   
+    for (var i=0; i<checkboxes.length; i++)  {
+      if (checkboxes[i].type == 'checkbox')   {
+        checkboxes[i].checked = checktoggle;
+      }
     }
   }
-}
+$(document).ready(function() {  
+  if (!Modernizr.inputtypes.date) { 
+    $( "input[type=date]" ).datepicker({ dateFormat: "yy-mm-dd" }); 
+  }
+});
 </script>
