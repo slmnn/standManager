@@ -425,6 +425,9 @@ module.exports = {
 						sails.io.sockets.emit('stand_' + s[0].stand_id, {msg:"Shift declined!"});
 				} else {
 					sails.io.sockets.emit('stand_' + s[0].stand_id, {msg:"Shift updated!"});
+					if(s[0].assigned_to_id != null) {
+						sails.io.sockets.emit('user_' + s[0].assigned_to_id, {msg:"Shift updated!"});
+					}
 				}
 				return res.json({msg:message});	
 			});	

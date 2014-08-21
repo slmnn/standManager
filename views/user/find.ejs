@@ -274,5 +274,17 @@ window.onload = function() {
 		  ]
 		});
 	});
+	socket.on('connect', function () {
+	  socket.on('user_' + user_id, function (data) {
+	    if(data.msg.indexOf('Shift') >= 0) {
+	    	$('#calendar').fullCalendar( 'refetchEvents' );
+	      $.notifyBar({ 
+	        cssClass: "success", 
+	        html: data.msg,
+	        position: "bottom"
+	      });
+	    }
+	  });
+	});
  }
 </script>
