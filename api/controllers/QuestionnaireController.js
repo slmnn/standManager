@@ -89,6 +89,7 @@ module.exports = {
 			var updateQuestionnaire = function(cb) {
 				Questionnaire.update({id:questionnaire.id},{filled:true, expires:expires}, function(err, new_q){
 					if(err) return cb(err);
+					sails.io.sockets.emit('stand_' + questionnaire.stand_id, {msg:"Questionnaire updated!", expires:expires, email:questionnaire.email});
 					return cb();
 				})
 			};

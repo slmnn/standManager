@@ -352,5 +352,30 @@ $(document).ready(function() {
 	  ]
 	});
 });
+socket.on('connect', function () {
+  socket.on('stand_' + stand_id, function (data) {
+  	if(data.msg.indexOf('Shift') >= 0) {
+  		if(data.msg.indexOf('accepted') != -1) {
+				$.notifyBar({ 
+					cssClass: "success", 
+					html: data.msg,
+					position: "bottom"
+				});
+		  	$('#calendar').fullCalendar( 'refetchEvents' );  			
+  		}
+  		if(data.msg.indexOf('declined') != -1) {
+				$.notifyBar({ 
+					cssClass: "error",
+					position: "bottom", 
+					html: data.msg 
+				});
+		  	$('#calendar').fullCalendar( 'refetchEvents' );  			
+  		}
+  	}
+  	if(data.msg.indexOf('Email') >= 0 && data.count_send) {
+  		console.log(data.count_all + '/' + data.count_send);
+  	}
+  });
+});
 }
 </script>

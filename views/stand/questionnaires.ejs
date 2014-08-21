@@ -49,3 +49,20 @@
 
   <% } %>
 </div>
+
+<script>
+window.onload = function() {
+var stand_id = <%= stand.id %>;
+socket.on('connect', function () {
+  socket.on('stand_' + stand_id, function (data) {
+    if(data.msg.indexOf('Questionnaire') >= 0) {
+      $.notifyBar({ 
+        cssClass: "success", 
+        html: data.msg + ' ('+data.email+')',
+        position: "bottom"
+      });
+    }
+  });
+});
+}
+</script>
