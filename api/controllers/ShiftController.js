@@ -30,6 +30,7 @@ module.exports = {
 						if(req.query.answer == 'yes') {
 							shift.accepted = true;
 							sails.io.sockets.emit('stand_' + shift.stand_id, {msg:"Shift accepted!"});
+							sails.io.sockets.emit('user_' + shift.assigned_to_id, {msg:"Shift accepted!"});
 							// TODO: send email confirmation
 						} else if(req.query.answer == 'no') {
 							shift.assigned_to_id = null;
@@ -38,6 +39,7 @@ module.exports = {
 							shift.assigned = false;
 							shift.email_sent = false;
 							sails.io.sockets.emit('stand_' + shift.stand_id, {msg:"Shift declined!"});
+							sails.io.sockets.emit('user_' + req.query.user_id, {msg:"Shift declined!"});
 						}
 						shift.save(function(err) {
 							if(err) return res.view({msg:'ERROR: Saving shift failed. ' + err});
@@ -227,13 +229,13 @@ module.exports = {
 					User.find({id:query}).exec(function(err, other_users) {
 						if(err) return cb(err);
 
-						//console.log('OTHER_USERS:', other_users);
+						console.log('USERS:', other_users);
 						var original_user = {};
 						for(var i = 0; i < other_users.length; i++) {
 							if(other_users[i].id == shift.assigned_to_id)
 								original_user = other_users[i];
 						}
-						//console.log('ORIGINAL USER:', original_user);
+						console.log('ORIGINAL USER:', original_user);
 
 						// Compose email
 						var user_contact_info = "";
@@ -375,10 +377,13 @@ module.exports = {
 	destroy: function(req, res) {
 		Shift.findOne({'id' : req.params.id}).exec(function(err, s) {
 			if(err || typeof s == 'undefined') res.send("ERROR: " + err, 500);
+			var stand_id = s.stand_id;
+			var user_id = s.assigned_to_id;
 			if(s.created_by == req.user[0].id) {
 				s.destroy(function(err) {
 					if(err) res.send("ERROR: " + err, 500);
-					sails.io.sockets.emit('stand_' + s.stand_id, {msg:"Shift destoyed!"});
+					sails.io.sockets.emit('stand_' + stand_id, {msg:"Shift destoyed!"});
+					sails.io.sockets.emit('user_' + user_id, {msg:"Shift destoyed!"});
 					return res.json({msg:'Shift destroyed!'});
 				})
 			} else {
@@ -418,16 +423,20 @@ module.exports = {
 			).exec(function(err, s){
 				// console.log(err, s);
 				if(err) res.send(500, {error: err});
-				if(req.user[0].id != s[0].created_by) {
-					if(s[0].accepted == true)
-						sails.io.sockets.emit('stand_' + s[0].stand_id, {msg:"Shift accepted!"});
-					if(s[0].accepted == false)
-						sails.io.sockets.emit('stand_' + s[0].stand_id, {msg:"Shift declined!"});
-				} else {
-					sails.io.sockets.emit('stand_' + s[0].stand_id, {msg:"Shift updated!"});
-					if(s[0].assigned_to_id != null) {
-						sails.io.sockets.emit('user_' + s[0].assigned_to_id, {msg:"Shift updated!"});
-					}
+				try {
+					if(req.user[0].id != s[0].created_by) {
+						if(s[0].accepted == true)
+							sails.io.sockets.emit('stand_' + s[0].stand_id, {msg:"Shift accepted!"});
+						if(s[0].accepted == false)
+							sails.io.sockets.emit('stand_' + s[0].stand_id, {msg:"Shift declined!"});
+					} else {
+						sails.io.sockets.emit('stand_' + s[0].stand_id, {msg:"Shift updated!"});
+						if(s[0].assigned_to_id != null) {
+							sails.io.sockets.emit('user_' + s[0].assigned_to_id, {msg:"Shift updated!"});
+						}
+					}					
+				} catch(err) {
+					console.log(err);
 				}
 				return res.json({msg:message});	
 			});	

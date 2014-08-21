@@ -1,5 +1,5 @@
 <div class="container">
-	<% if(err != null || shift == null || stand == null) { %>
+	<% if(err != null || shift == null || stand == null || shift.accepted == false) { %>
 		<p><%= i18n('There was a mistake in the system. Perhaps you have declined this assignment. See error message below:') %>
 		<div class="alert alert-danger" role="alert"><%= err %></div>
 	<% } else { %>
