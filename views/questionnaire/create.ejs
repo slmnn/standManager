@@ -7,6 +7,7 @@
     <li><a href="/stand/users/<%= stand.id %>"><%= i18n('Personnel') %></a></li>
     <li><a href="/stand/invitations/<%= stand.id %>"><%= i18n('Invitations') %></a></li>
     <li class="active"><a href="/stand/questionnaires/<%= stand.id %>"><%= i18n('Questionnaires') %></a></li>
+    <li><a href="/stand/traces/<%= stand.id %>"><%= i18n('Traces') %></a></li>
     <li><a href="/stand/kickuser/<%= stand.id %>"><%= i18n('Remove participants') %></a></li>
   </ul>
   <div class="page-header"><h2><%= i18n('Create new questionnaires') %> <small><%= stand.name %></small></h2></div>
@@ -68,6 +69,7 @@ _myfullname
 </div>
 
 <script>
+window.onload = function() {
 $("#input_user").change(function(event) {
 	$( "#questionnaire_form" ).find( "#input_email" ).val($( "#questionnaire_form" ).find( "#input_user :selected" ).attr('email'));
 });
@@ -110,4 +112,5 @@ $( "#questionnaire_form" ).submit(function( event ) {
     var box = bootbox.alert("ERROR: " + err);
   });
 });
+}
 </script>

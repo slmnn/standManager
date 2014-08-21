@@ -17,6 +17,7 @@
 </div>
 
 <script>
+window.onload = function() {
 // Attach a submit handler to the form
 $( "#input_submit_accept" ).click(function( event ) {
  
@@ -60,4 +61,5 @@ $( "#input_submit_decline" ).click(function( event ) {
     var box = bootbox.alert("ERROR: " + err.msg);
   });
 });
+}
 </script>

@@ -58,6 +58,7 @@ var stand_id = "<%= stand.id %>";
 var stand_name = "<%= stand.name %>";
 var last_calendar_event_clicked = {};
 
+window.onload = function() {
 $(document).ready(function() {
 
 $( "#send_assignments_emails_btn" ).click(function( event ) {
@@ -351,4 +352,5 @@ $(document).ready(function() {
 	  ]
 	});
 });
+}
 </script>

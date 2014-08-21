@@ -1,5 +1,6 @@
 	// After page is fully loaded
 
+if(typeof google != 'undefined') {
 
 	// configuration
 	var myZoom = 13;
@@ -52,3 +53,4 @@ var setMarker = function() {
 }
 
 setTimeout(1000,'setMarker();');
+}

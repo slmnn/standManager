@@ -28,6 +28,7 @@
 </div>
 
 <script type="text/javascript">
+window.onload = function() {
 $(document).ready(function() {
 	$("#c_b :checkbox").change(function(event){
 		$('#input_calendars').val($("#c_b :checkbox:checked").map(function () {
@@ -35,4 +36,5 @@ $(document).ready(function() {
 		).get().join(","));		
 	})
 })
+}
 </script>

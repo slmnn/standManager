@@ -7,6 +7,7 @@
     <li><a href="/stand/users/<%= stand.id %>"><%= i18n('Personnel') %></a></li>
     <li><a href="/stand/invitations/<%= stand.id %>"><%= i18n('Invitations') %></a></li>
     <li><a href="/stand/questionnaires/<%= stand.id %>"><%= i18n('Questionnaires') %></a></li>
+    <li><a href="/stand/traces/<%= stand.id %>"><%= i18n('Traces') %></a></li>
     <li class="active"><a href="/stand/kickuser/<%= stand.id %>"><%= i18n('Remove participants') %></a></li>
   </ul>
   <% } %>
@@ -64,6 +65,7 @@ $('#input_user_id').on('change', function() {
 </script>
 
 <script>
+window.onload = function() {
 // Attach a submit handler to the form
 $( "#kickuser_form" ).submit(function( event ) {
  
@@ -104,4 +106,5 @@ $( "#kickuser_form" ).submit(function( event ) {
     var box = bootbox.alert("ERROR: " + err.msg);
   });
 });
+}
 </script>

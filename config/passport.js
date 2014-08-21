@@ -58,6 +58,7 @@ module.exports = {
           clientID: sails.config.google_consumer_key,
           clientSecret: sails.config.google_consumer_secret,
           callbackURL: sails.config.google_redirect_uri,
+          accessType: 'offline',
           scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar.readonly']
         },
         function(accessToken, refreshToken, profile, done) {

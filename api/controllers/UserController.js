@@ -131,6 +131,7 @@ module.exports = {
 						client_id:sails.config.google_consumer_key,
 						client_secret:sails.config.google_consumer_secret,
 						refresh_token:req.user[0].google_calendar_refreshToken,
+						access_type: 'offline',
 						grant_type:'refresh_token'
 					};
 					needle.post('https://accounts.google.com/o/oauth2/token', post_data, 
