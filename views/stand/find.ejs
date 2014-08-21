@@ -371,6 +371,7 @@ socket.on('connect', function () {
 				});
 		  	$('#calendar').fullCalendar( 'refetchEvents' );  			
   		}
+  		$('#calendar').fullCalendar( 'refetchEvents' );  		
   	}
   	if(data.msg.indexOf('Email') >= 0 && data.count_send) {
   		console.log(data.count_all + '/' + data.count_send);
