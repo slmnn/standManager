@@ -35,14 +35,6 @@ module.exports.routes = {
   'post /login': 'AuthController.process',
   'get /logout': 'AuthController.logout',
 
-  'get /auth/gcalendar': 'AuthController.gcalendar',
-
-  'post /invitation/accept/:id': 'InvitationController.accept', 
-
-  'get /home': 'UserController.home',
-  'get /user/shifts/:id': 'UserController.findShifts',
-  'get /user/resign/:id': 'UserController.resign',
-
   'get /stand/kickuser/:id': 'StandController.kickUser',
   'get /stand/possibleusers/:id': 'StandController.findUsersForShift',
   'get /stand/shifts/:id': 'StandController.findShifts',

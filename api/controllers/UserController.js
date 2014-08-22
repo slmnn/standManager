@@ -55,7 +55,7 @@ module.exports = {
 			}
 		})
 	},
-	
+
 	resign : function(req, res) {
 		if(req.method == 'POST') {
 			User.findOne({id:req.user[0].id}).exec(function(err, user) {
@@ -91,12 +91,13 @@ module.exports = {
 			return res.send("Only GET allowed!", 404);
 		}
 	},
-	findShifts: function(req, res) {
+	shifts: function(req, res) {
 		var start = new Date(moment(req.query.start));
 		var end = new Date(moment(req.query.end));
 		Shift.find({assigned_to_id:req.params.id})
 		.where({ start: { '>=': start }})
 		.where({ end: { '<=': end }})
+		.sort({start: 'asc'})
 		.exec(function(err, s) {
 			if(err) res.send(500, {error: err});
 			var out = [];
@@ -114,6 +115,12 @@ module.exports = {
 			}
 			res.json(out, 200);
 		});
+	},
+	questionnaires: function(req, res) {
+		Questionnaire.find({user_id:req.params.id}).exec(function(err, q) {
+			if(err) return res.json([]);
+			return res.json(q);
+		})
 	},
 	reservations: function(req, res) {
 		if(req.method == 'GET') {
