@@ -113,10 +113,10 @@ module.exports = {
       });
     } else {
       if(user.password) {
-        console.log("Password change detected!!!", user);
+        // console.log("Password change detected!!!", user);
         var sc = simplecrypt({salt:sails.config.sc_salt, password:sails.config.sc_password});
         user.password = sc.encrypt(user.password);
-        console.log("Password change detected!!!", user);
+        // console.log("Password change detected!!!", user);
         cb(null, user);
       }
     }

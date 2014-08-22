@@ -17,6 +17,7 @@
 
 var gcal = require('google-calendar');
 var needle = require('needle');
+var randomstring = require("just.randomstring");
 
 module.exports = {
 	home : function (req, res) {
@@ -26,6 +27,33 @@ module.exports = {
 			return res.send("Forbidden!", 403);
 		}
 		return res.redirect("/user/find/" + req.user[0].id)
+	},
+	generateNewPassword : function(req, res) {
+		var pattern = new RegExp(/^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/);
+		if(!pattern.test(req.body.input_email)) return res.send("ERROR: Invalid email!");
+		User.find({email:req.body.input_email}).exec(function(err, u) {
+			if(err || u.length == 0) return res.send("ERROR: No such user!");
+			if(u.length != 1) return res.send("ERROR: This email has been used more than once. Contact admin!")
+			if(u[0].email.length <= 0) return res.send("ERROR: No email!");
+			try {
+				var link = "http://" + req.headers.host + "/login";
+				var password = randomstring(8);
+				utils.sendEmail({
+					from    : sails.config.INVITATION_EMAIL_USER,
+					to      : u[0].email,
+					subject : "Your new password to " + req.headers.host,
+					html    : "<p>Your password to <a href='"+link+"'>"+link+"</a> is</p><p><b>" + password + "<b></p>"
+				}, function(err) {
+					if(err) return res.send("ERROR: " + err);
+					User.update(u[0].id,{password:password}, function(err, new_user){
+						if(err) return res.send("ERROR: " + err);
+						return res.json({msg:"New password was sent to " + u[0].email});											
+					})					
+				})					
+			} catch(err) {
+				return res.send("ERROR: " + err);
+			}
+		})
 	},
 	resign : function(req, res) {
 		if(req.method == 'POST') {

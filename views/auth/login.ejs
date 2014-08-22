@@ -48,6 +48,37 @@ body {
       <input type="text" name="username" class="form-control" required autofocus placeholder="<%= i18n('Username') %>"></input>
       <input type="password" name="password" class="form-control" required placeholder="<%= i18n('Password') %>"></input>
       <button type="submit" class="btn btn-lg btn-primary btn-block"><i class="fa fa-sign-in"></i> <%= i18n('Log in') %></button>
+      <p><%= i18n("Forgot your password?") %><a href="#" id="reset_password_link"> <%= i18n("Reset it.") %></a></p>
   </form>
 </div>
 
+<script>
+window.onload = function() {
+  $('#reset_password_link').click( function(e) { 
+    e.preventDefault(); 
+    reset_password(); 
+    return false;
+  } );
+  var reset_password = function() {
+    bootbox.prompt("<%= i18n('Enter your email address and press OK to reset your password.') %>", function(result) {                
+      if (result === null) {
+        return;                         
+      } else {
+        var pattern = new RegExp(/^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/);
+        if(!pattern.test(result)) {
+          bootbox.alert("ERROR: Invalid email address!");
+          return;
+        } else {
+          $.post("/user/generateNewPassword", {
+            input_email : result
+          }).done(function(data) {
+            bootbox.alert(data.msg ? data.msg : data);
+          })  .fail(function(err) {
+            var box = bootbox.alert("Password reset failed!");
+          });
+        }  
+      }
+    });
+  }
+}
+</script>

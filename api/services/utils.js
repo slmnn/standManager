@@ -30,7 +30,7 @@ module.exports = {
 	    if(error){
 	      cb('Sending shift assignment failed! ERROR: ' + error);	
 	    }else{
-	    	cb('Shift assignment sent to ' + mailOptions.to + '!');
+	    	cb();
 	    }
 		});	
   }

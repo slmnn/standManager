@@ -21,7 +21,8 @@ module.exports.policies = {
   
   '*': "authenticated",
   UserController: {
-    "create": false
+    "create": false,
+    "generateNewPassword": true
   },
   ShiftController: {
     "find":true,

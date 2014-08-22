@@ -89,7 +89,8 @@ module.exports = {
 					subject: "Muistutus vuoromääräyksestä " + start.format('dddd DD. MMMM YYYY') + ', ' + start.format('HH:mm') + ' - ' + end.format('HH:mm'),
 					html: "<p>Tarkista vuoron tiedot alla olevasta linkistä.<br><a href='"+link+"''>"+link+"</a></p>"
 				}, function(err) {
-					res.json({msg:err});
+					if(err) return res.json({msg:err});
+					return res.json({msg:"Reminding email sent to " + user.email});
 				})				
 			})
 		}
