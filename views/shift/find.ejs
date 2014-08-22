@@ -5,7 +5,7 @@
 	<% } else { %>
 		<h2><%= i18n('Assignment') %> <small><%= stand.name %></small></h2>
 		<% var start = moment(shift.start); var end = moment(shift.end); %>
-		<h3><i class="fa fa-calendar"></i> <%= (shift.start.format('dddd DD. MMMM YYYY') + ' ' + shift.start.format('HH:mm') + '-' + shift.end.format('HH:mm')) %></h3>
+		<h3><i class="fa fa-calendar"></i> <%= (start.format('dddd DD. MMMM YYYY') + ' ' + start.format('HH:mm') + '-' + end.format('HH:mm')) %></h3>
 		<dl class="dl-horizontal">
 		  <dt><%= i18n('Attendees') %></dt>
 		  <dd>
