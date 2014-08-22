@@ -55,6 +55,7 @@ module.exports = {
 			}
 		})
 	},
+	
 	resign : function(req, res) {
 		if(req.method == 'POST') {
 			User.findOne({id:req.user[0].id}).exec(function(err, user) {

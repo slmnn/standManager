@@ -4,6 +4,51 @@
 	<div class="page-header">
     <h2><%= user.firstname %> <%= user.lastname %></h2>
   </div>
+
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+          <%= i18n('Upcoming shifts') %> <span class="badge success" id="upcoming_shifts_badge"></span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body" id="upcoming_shifts">
+
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+          <%= i18n('Questionnaires') %>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse">
+      <div class="panel-body" id="questionnaires">
+        Not implemented
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+          <%= i18n('Messages') %>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse" id="messages">
+      <div class="panel-body">
+        Not implemented
+      </div>
+    </div>
+  </div>
+</div>
   
 	<div id='calendar' class="calendar"></div>
 
@@ -24,7 +69,7 @@
       </div>
       <div class="modal-footer">
 			  <button id="accept_shift_button" class="btn btn-success"><%= i18n('Accept') %></button>
-			  <!-- <button id="reject_shift_button" class="btn btn-danger"><%= i18n('Reject') %></button> -->
+			  <button id="reject_shift_button" class="btn btn-danger"><%= i18n('Reject') %></button>
 			  <button type="button" class="btn btn-default" data-dismiss="modal"><%= i18n('Close') %></button>
       </div>
     </div><!-- /.modal-content -->
@@ -37,9 +82,92 @@ var user_fullname = "<%= user.firstname %> <%= user.lastname %>";
 var last_calendar_event_clicked = {};
 var google_events = [];
 
+var accept_shift = function(shift_id) {
+  $("#assign_shift_modal").modal("hide");	
+  // Send the data using post
+	var posting = $.post( '/shift/update/' + shift_id, 
+		{ 
+			input_assigned_to_id: user_id,
+			input_assigned_to_name: user_fullname,
+			input_accepted: 'true',
+			input_email_sent: 'true'
+		} 
+	).done(function(data) {
+    var content = data.msg;
+    var box = bootbox.alert('' + content);
+		setTimeout(function() {
+    	box.modal('hide');
+    	$('#calendar').fullCalendar( 'refetchEvents' );
+		}, 1500);
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err);
+  });
+};
+
+var decline_shift = function(shift_id) {
+  $("#assign_shift_modal").modal("hide");	
+  // Send the data using post
+	var posting = $.post( '/shift/update/' + shift_id, 
+		{ 
+			input_assigned_to_id: '-1'
+		} 
+	).done(function(data) {
+    var content = data.msg;
+    var box = bootbox.alert('' + content);
+		setTimeout(function() {
+    	box.modal('hide');
+    	$('#calendar').fullCalendar( 'refetchEvents' );
+		}, 1500);
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err);
+  });
+}
+
 window.onload = function() {
+
+
 	$(document).ready(function() {
-		google_events_to_reservations
+
+		var get_upcoming_shifts = function () {
+			var today = new Date();
+			var next_year = new Date(today.getTime() + 1000*60*60*24*365);
+			$("#upcoming_shifts").empty();
+			$.get("/user/findShifts/"+user_id+"?start=" + today.toString() + "&end=" + next_year.toString())
+			.done(function(data) {
+				if(data.length == 0) {
+					$("#upcoming_shifts").append('<p><%= i18n("You do not have any shift assignments yet!") %></p>');
+					return;
+				}
+				$("#upcoming_shifts_badge").text(data.length);
+				$("#upcoming_shifts").append('<table class="table" id="upcoming_shifts_table">\
+	        	<tr>\
+	        		<th><%= i18n('Stand') %></th>\
+	        		<th><%= i18n('Day') %></th>\
+	        		<th><%= i18n('Starts') %></th>\
+	        		<th><%= i18n('Ends') %></th>\
+	        		<th><%= i18n('Answer') %></th>\
+	        		<th><%= i18n('Link') %></th>\
+	        	</tr>\
+	        </table>');			
+				var rowTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td><a href='#' onClick='accept_shift({4});return false;'><%= i18n('Accept') %></a> / <a href='#'  onClick='decline_shift({4});return false;'><%= i18n('Decline') %></a></td><td></td></tr>";
+				var rowTemplate_accepted = "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td><%= i18n('Accepted') %></td><td><a href='{4}' target='_blank'>#</a></td></tr>";
+				$.each(data, function(index, shift) {
+					var day = moment(shift.start).format('DD.MM.YYYY');
+					var starts = moment(shift.start).format('HH:mm');
+					var ends = moment(shift.end).format('HH:mm');
+					var answer_link = 'http://<%= req.headers.host %>/shift/response/' + shift.id + '?user_id=' + user_id;
+					var yeslink = answer_link + '&answer=yes';
+					var nolink = answer_link + '&answer=no';
+					var link = 'http://<%= req.headers.host %>/shift/find/' + shift.id + '?user_id=' + user_id;
+					if(shift.accepted == true) {
+						$("#upcoming_shifts_table").append(rowTemplate_accepted.format(shift.title, day, starts, ends, link));
+					} else {
+						$("#upcoming_shifts_table").append(rowTemplate.format(shift.title, day, starts, ends, '"' + shift.id + '"'));
+					}
+				})
+			})
+		};
+
 		$( "#google_events_to_reservations" ).click(function( event ) {
 			var box = bootbox.confirm("This will generate " + google_events.length + " new reservations. Are you sure?", function(ok) {
 				if(ok) {
@@ -72,7 +200,8 @@ window.onload = function() {
 				{ 
 					input_assigned_to_id: user_id,
 					input_assigned_to_name: user_fullname,
-					input_accepted: 'true'
+					input_accepted: 'true',
+					input_email_sent: 'true'
 				} 
 			).done(function(data) {
 		    var content = data.msg;
@@ -131,9 +260,12 @@ window.onload = function() {
 				if(calEvent.type == "shift") {
 					if(calEvent.accepted) { 
 						$('#accept_shift_button').prop('disabled', true);
+						$('#reject_shift_button').prop('disabled', true);
 					} else {
 						$('#accept_shift_button').prop('disabled', false);
+						$('#reject_shift_button').prop('disabled', false);
 						$('#accept_shift_button').prop('enabled', true);
+						$('#reject_shift_button').prop('enabled', true);
 					}
 					var now_accepted_text = calEvent.accepted ? "" : "not";
 					$("#assign_shift_now_assigned_to").text("You have " + now_accepted_text + " accepted the shift.");
@@ -224,6 +356,7 @@ window.onload = function() {
 			},
 			loading : function(isLoading, view) {
 				if(isLoading) {
+					get_upcoming_shifts();
 					google_events = [];
 					$('#google_events_to_reservations').prop('disabled', true);
 				} else {

@@ -139,6 +139,7 @@ module.exports = {
 				.where({ start : shift.start_original })
 				.where({ end : shift.end_original })
 				.exec(function(err, other_shifts) {
+					console.log("OTHER_SHIFTS", other_shifts);
 					var query = [];
 					for(var i = 0; i < other_shifts.length; i++) {
 						query.push(other_shifts[i].assigned_to_id);
