@@ -33,6 +33,9 @@ module.exports.policies = {
     "response": true,
     "accept": true
   },
+  MessageController: {
+    "create": true
+  },
   QuestionnaireController: {
     "submit": true,
     "find": true

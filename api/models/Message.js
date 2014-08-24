@@ -5,11 +5,19 @@
 module.exports = {
   migrate: 'safe',
   attributes: {
-  	from: {
+  	from_id: {
   		type: 'string',
   		required: true
   	},
-  	to: {
+    from_name: {
+      type: 'string',
+      required: true
+    },
+    from_email: {
+      type: 'string',
+      required: true
+    },
+  	stand_id: {
   		type: 'string',
   		required: true
   	},
@@ -17,7 +25,11 @@ module.exports = {
   		type: 'string',
   		required: true
   	},
-  	read: {
+    subject: {
+      type: 'string',
+      required: true
+    },
+  	seen: {
   		type: 'boolean',
   		required: true
   	}

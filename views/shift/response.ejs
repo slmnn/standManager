@@ -16,10 +16,74 @@
 			<div class="alert alert-info" role="alert">
 				<h4><%= i18n('Shift declined :(') %></h4>
 				<%= i18n('Your answer is now saved! Stay tuned for new shift opportunities.') %></div>
-				<p><%= i18n('If you want, you can tell the reason via email to stand owner. Please use the link below to send the email.') %><br>
+				<p><%= i18n('If you want, you can tell the reason to stand owner. Please use the form below.') %><br>
 				<% var start = new Date(shift.start) %>
+
+				<!--
 			  <a href="mailto:<%= created_by.email %>?subject=<%= i18n('Reason for declining') %> (<%= start.toLocaleString() %>)&body=<%= i18n('Hi, I declined the shift because of...') %>"><%= i18n('Send reason via email') %></a></p>
+				-->
+
+				<% if(old_shift != null) { %> 
+ 			  <form class="form-horizontal" id="reason_for_declining">
+					<legend><%= i18n('Tell reason for declining') %></legend>
+				  <div class="form-group">
+				    <label class="col-sm-2 control-label"><%= i18n('Name') %></label>
+				    <div class="col-sm-10">
+				      <p class="form-control-static" id="reason_for_declining_name"><%= old_shift.assigned_to_name %></p>
+				    </div>
+				  </div>
+
+				  <div class="form-group">
+				    <label class="col-sm-2 control-label"><%= i18n('Reason') %></label>
+				    <div class="col-sm-10">
+			  			<textarea class="form-control" rows="3" id="reason_for_declining_content" required></textarea>
+				    </div>
+				  </div>
+
+				  <button type="submit" class="btn btn-primary pull-right" id="reason_for_declining_submit" disabled><%= i18n('Send') %></button>
+			  </form>
+				<% } %>
 		<% } %>
 	<% } %>
 
 </div>
+
+<script>
+window.onload = function() {
+$("#reason_for_declining_content").on('change keyup paste', function() {
+	if($("#reason_for_declining_content").val().length == 0) {
+		$('#reason_for_declining_submit').prop('disabled', true);
+	} else {
+		$('#reason_for_declining_submit').prop('disabled', false);
+		$('#reason_for_declining_submit').prop('enabled', true);
+	}
+});
+
+// Attach a submit handler to the form
+$( "#reason_for_declining" ).submit(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+ 
+  // Get some values from elements on the page:
+  var body = {
+		input_from_id  : "<%= old_shift.assigned_to_id %>",
+	  input_to_id    : "<%= old_shift.stand_id %>",
+	  input_content  : $("#reason_for_declining_content").val(),
+	  input_subject  : "<%= i18n('Reason for declining a shift') %> (<%= start.toLocaleString() %>)"
+  } 
+ 
+  // Send the data using post
+	var posting = $.post( "/message/create", body
+	).done(function(data) {
+    console.log(data);
+    var box = bootbox.alert("<%= i18n('Message sent to stand owner!') %>");
+    setTimeout(function() {
+    	box.modal('hide');
+		}, 1500);
+  }).fail(function(err) {
+    var box = bootbox.alert("ERROR: " + err);
+  });
+});
+}
+</script>

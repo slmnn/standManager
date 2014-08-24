@@ -17,6 +17,7 @@
 
 var gcal = require('google-calendar');
 var needle = require('needle');
+var async = require('async');
 var randomstring = require("just.randomstring");
 
 module.exports = {
@@ -117,9 +118,24 @@ module.exports = {
 		});
 	},
 	questionnaires: function(req, res) {
+		var questionnaires_with_stand_details = [];
 		Questionnaire.find({user_id:req.params.id}).exec(function(err, q) {
 			if(err) return res.json([]);
-			return res.json(q);
+			async.forEach(q, function(questionnaire, cb) {
+				Stand.findOne(questionnaire.stand_id+'').exec(function(err, stand) {
+					if(err) return cb(err);
+					var stand_details = {
+						name 				: stand.name,
+						description : stand.description,
+						location 		: stand.location
+					}
+					questionnaire.stand_details = stand_details;
+					questionnaires_with_stand_details.push(questionnaire);
+					cb();
+				})
+			}, function(err) {
+				return res.json(questionnaires_with_stand_details);
+			})
 		})
 	},
 	reservations: function(req, res) {

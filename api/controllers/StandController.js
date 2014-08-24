@@ -59,7 +59,7 @@ module.exports = {
 				//.where(search_start)
 				//.where(search_end)
 				//.limit(search_limit)
-				.sort({ createdAt: 'desc' })
+				.sort({ createdAt: 'asc' })
 				.exec(function(err, t){
 		      return res.view({
 		        traces : t,

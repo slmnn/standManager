@@ -24,7 +24,7 @@
     <div class="panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-          <%= i18n('Questionnaires') %> <span class="badge" id="questionnaires_badge"></span>
+          <%= i18n('Questionnaires') %> <span class="badge alert-info" id="questionnaires_badge"></span> <span class="badge" style="background-color: #b94a48;" id="questionnaires_alert_badge"></span>
         </a>
       </h4>
     </div>
@@ -180,22 +180,31 @@ window.onload = function() {
 				$("#questionnaires").append('<table class="table" id="questionnaires_table">\
 	        	<tr>\
 	        		<th><%= i18n('Updated') %></th>\
-	        		<th><%= i18n('User email') %></th>\
+	        		<th><%= i18n('Stand name') %></th>\
 	        		<th><%= i18n('Answered') %></th>\
 	        		<th><%= i18n('Answers expire') %></th>\
 	        		<th><%= i18n('Link') %></th>\
 	        	</tr>\
 	        </table>');			
-				var rowTemplate = "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td><a href='{4}' target='_blank'><%= i18n('Open') %></a></td></tr>";
+				var alert_count = 0;
 				$.each(data, function(index, q) {
 					var updated = moment(q.updatedAt).format('DD.MM.YYYY HH:mm');
 					var expires = moment(q.expires).format('DD.MM.YYYY');
+					var today = moment();
+					if(today.isAfter(moment(q.expires)) || q.filled === false) {
+						alert_count++;
+					}
+
 					var link = 'http://<%= req.headers.host %>/questionnaire/find/' + q.id + '?email=' + q.email + '&user_id=' + q.user_id;
           link = link.replace('+','%2B');
-					$("#questionnaires_table").append(
-						rowTemplate.format(updated, q.email, q.filled ? "<%= i18n('Yes') %>" : "<%= i18n('No') %>", expires, link)
+
+					var rowTemplate = "<tr><td>{0}</td><td>{1}</td><td class='" + (q.filled ? "success" : "danger") + "'>{2}</td><td class='" + (today.isBefore(moment(q.expires)) ? "success" : "danger") + "'>{3}</td><td><a href='{4}' target='_blank'><%= i18n('Open') %></a></td></tr>";
+
+        	$("#questionnaires_table").append(
+						rowTemplate.format(updated, q.stand_details.name, q.filled ? "<%= i18n('Yes') %>" : "<%= i18n('No') %>", expires, link)
 					);
 				})
+				$("#questionnaires_alert_badge").text(alert_count);
 			})
 		};
 

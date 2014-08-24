@@ -21,6 +21,7 @@ module.exports = {
 			.where({accepted:false})
 			.exec(function(err, shift) {
 				if(err || shift == null) return res.view({msg:'ERROR: shift is undefined. ' + err});
+				var old_shift = JSON.parse( JSON.stringify( shift ) );;
 				utils.createTrace(
 					{
 						stand_id:shift.stand_id,user_id:shift.assigned_to_id, user_name:shift.assigned_to_name, shift_id:shift.id, shift_start:shift.start, shift_end:shift.end,
@@ -44,7 +45,7 @@ module.exports = {
 						shift.save(function(err) {
 							if(err) return res.view({msg:'ERROR: Saving shift failed. ' + err});
 							User.findOne(shift.created_by).exec(function(err, shift_creator) {
-								return res.view({msg:'OK', answer_was_yes: shift.accepted, shift:shift, created_by:shift_creator});
+								return res.view({msg:'OK', answer_was_yes: shift.accepted, shift:shift, created_by:shift_creator, old_shift: old_shift});
 							});
 						})						
 					})
@@ -440,7 +441,14 @@ module.exports = {
 				} catch(err) {
 					console.log(err);
 				}
-				return res.json({msg:message});	
+				utils.createTrace(
+					{
+						stand_id:s[0].stand_id,user_id:s[0].assigned_to_id, user_name:s[0].assigned_to_name, shift_id:s[0].id, shift_start:s[0].start, shift_end:s[0].end,
+					  message: ("User or you marked the shift as " + (s[0].assigned ? (s[0].accepted ? 'accepted' : 'assigned') : 'unassigned') )
+					}, 
+					function(err) {
+						return res.json({msg:message});	
+					});
 			});	
 		}
 	}
